@@ -1,0 +1,77 @@
+## Flox Environment Manifest -----------------------------------------
+##
+##   _Everything_ you need to know about the _manifest_ is here:
+##
+##   https://flox.dev/docs/reference/command-reference/manifest.toml/
+##
+## -------------------------------------------------------------------
+# Flox manifest version managed by Flox CLI
+version = 1
+
+
+## Install Packages --------------------------------------------------
+##  $ flox install gum  <- puts a package in [install] section below
+##  $ flox search gum   <- search for a package
+##  $ flox show gum     <- show all versions of a package
+## -------------------------------------------------------------------
+[install]
+claude-code.pkg-path = "claude-code"
+apacheKafka.pkg-path = "apacheKafka"
+python312.pkg-path = "python312"
+flink.pkg-path = "flink"
+openjdk.pkg-path = "openjdk"
+kafka-python.pkg-path = "python312Packages.kafka-python"
+packaging.pkg-path = "python312Packages.packaging"
+flask.pkg-path = "python312Packages.flask"
+# gum.pkg-path = "gum"
+# gum.version = "^0.14.5"
+
+[hook]
+on-activate = '''
+#!/bin/bash
+# Initialize Claude context directory
+mkdir -p .claude/context .claude/instructions .claude/templates
+
+# Create Flox-first instructions for Claude
+cat > .claude/instructions.md << "INSTRUCTIONS"
+# CRITICAL: Flox Environment Management
+
+You are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:
+
+## Dependency Rules:
+- NEVER use: brew, apt, npm install, pip install, cargo install, etc.
+- ALWAYS use: flox install <package>
+- All dependencies MUST be declared in .flox/env/manifest.toml
+
+## Flox Commands:
+- Add package: flox install <package>
+- Search packages: flox search <package>
+- Show environment: flox list
+
+## When Creating Projects:
+1. Define all deps in manifest.toml
+2. Use [profile] for PATH setup
+3. Use [hook] for initialization
+
+NEVER bypass Flox - it manages the ENTIRE environment.
+INSTRUCTIONS
+
+# Generate current environment state
+echo "# Current Flox Environment" > .claude/context/flox-state.md
+echo "Generated: $(date)" >> .claude/context/flox-state.md
+echo "" >> .claude/context/flox-state.md
+flox list >> .claude/context/flox-state.md
+
+echo "✅ Claude + Flox integration ready!"
+'''
+
+[vars]
+KAFKA_HOME = "$FLOX_ENV/libexec/kafka"
+KAFKA_HEAP_OPTS = "-Xmx512M -Xms512M"
+
+[profile]
+common = '''
+export CLAUDE_CONTEXT_DIR="$FLOX_ENV_PROJECT/.claude"
+alias claude='claude-code --project-dir "$FLOX_ENV_PROJECT"'
+export PYTHONPATH="$FLOX_ENV_PROJECT:$PYTHONPATH"
+'''

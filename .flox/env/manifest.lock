@@ -1,0 +1,989 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "apacheKafka": {
+        "pkg-path": "apacheKafka"
+      },
+      "claude-code": {
+        "pkg-path": "claude-code"
+      },
+      "flask": {
+        "pkg-path": "python312Packages.flask"
+      },
+      "flink": {
+        "pkg-path": "flink"
+      },
+      "kafka-python": {
+        "pkg-path": "python312Packages.kafka-python"
+      },
+      "openjdk": {
+        "pkg-path": "openjdk"
+      },
+      "packaging": {
+        "pkg-path": "python312Packages.packaging"
+      },
+      "python312": {
+        "pkg-path": "python312"
+      }
+    },
+    "vars": {
+      "KAFKA_HEAP_OPTS": "-Xmx512M -Xms512M",
+      "KAFKA_HOME": "$FLOX_ENV/libexec/kafka"
+    },
+    "hook": {
+      "on-activate": "#!/bin/bash\n# Initialize Claude context directory\nmkdir -p .claude/context .claude/instructions .claude/templates\n\n# Create Flox-first instructions for Claude\ncat > .claude/instructions.md << \"INSTRUCTIONS\"\n# CRITICAL: Flox Environment Management\n\nYou are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:\n\n## Dependency Rules:\n- NEVER use: brew, apt, npm install, pip install, cargo install, etc.\n- ALWAYS use: flox install <package>\n- All dependencies MUST be declared in .flox/env/manifest.toml\n\n## Flox Commands:\n- Add package: flox install <package>\n- Search packages: flox search <package>\n- Show environment: flox list\n\n## When Creating Projects:\n1. Define all deps in manifest.toml\n2. Use [profile] for PATH setup\n3. Use [hook] for initialization\n\nNEVER bypass Flox - it manages the ENTIRE environment.\nINSTRUCTIONS\n\n# Generate current environment state\necho \"# Current Flox Environment\" > .claude/context/flox-state.md\necho \"Generated: $(date)\" >> .claude/context/flox-state.md\necho \"\" >> .claude/context/flox-state.md\nflox list >> .claude/context/flox-state.md\n\necho \"✅ Claude + Flox integration ready!\"\n"
+    },
+    "profile": {
+      "common": "export CLAUDE_CONTEXT_DIR=\"$FLOX_ENV_PROJECT/.claude\"\nalias claude='claude-code --project-dir \"$FLOX_ENV_PROJECT\"'\nexport PYTHONPATH=\"$FLOX_ENV_PROJECT:$PYTHONPATH\"\n"
+    },
+    "options": {}
+  },
+  "packages": [
+    {
+      "attr_path": "apacheKafka",
+      "broken": false,
+      "derivation": "/nix/store/pzlca8vzy5l1py8g7nihrlgfzvwpnhv1-apache-kafka-2.13-4.1.0.drv",
+      "description": "High-throughput distributed messaging system",
+      "install_id": "apacheKafka",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "apache-kafka-2.13-4.1.0",
+      "pname": "apacheKafka",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:17:43.269277Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13-4.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/a79dq4ml70kra350f52m0na4hwak1r29-apache-kafka-2.13-4.1.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "apacheKafka",
+      "broken": false,
+      "derivation": "/nix/store/qkdxvfxjvdqbpn96a04j4v91jwz5alrr-apache-kafka-2.13-4.1.0.drv",
+      "description": "High-throughput distributed messaging system",
+      "install_id": "apacheKafka",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "apache-kafka-2.13-4.1.0",
+      "pname": "apacheKafka",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:20.101780Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13-4.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/awy9vpz10qhqz6ggk2wvwvs13dhlsrbf-apache-kafka-2.13-4.1.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "apacheKafka",
+      "broken": false,
+      "derivation": "/nix/store/nynxqfjfb4w3y5gzq45dpyaxkyimz2bb-apache-kafka-2.13-4.1.0.drv",
+      "description": "High-throughput distributed messaging system",
+      "install_id": "apacheKafka",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "apache-kafka-2.13-4.1.0",
+      "pname": "apacheKafka",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:17.732927Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13-4.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/f2zf6aqdkmb3s4zba3h3ha264ylgkrs5-apache-kafka-2.13-4.1.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "apacheKafka",
+      "broken": false,
+      "derivation": "/nix/store/ig824np71czn7biqh5yz8azmnn904qmz-apache-kafka-2.13-4.1.0.drv",
+      "description": "High-throughput distributed messaging system",
+      "install_id": "apacheKafka",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "apache-kafka-2.13-4.1.0",
+      "pname": "apacheKafka",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:46:23.702009Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.13-4.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/rnj995ln2k37p2x1nl3z0wb60565spc9-apache-kafka-2.13-4.1.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "claude-code",
+      "broken": false,
+      "derivation": "/nix/store/vndxci9sm7ihp4f134ccrspdw23ca5l7-claude-code-2.0.14.drv",
+      "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
+      "install_id": "claude-code",
+      "license": "Unfree",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "claude-code-2.0.14",
+      "pname": "claude-code",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:17:43.586285Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "2.0.14",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/m6ycy22n6pchp7zr1zyw0ydzgmfg90db-claude-code-2.0.14"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "claude-code",
+      "broken": false,
+      "derivation": "/nix/store/qzhhsfgy2h5csbv3gfvcm4s6n29mym0v-claude-code-2.0.14.drv",
+      "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
+      "install_id": "claude-code",
+      "license": "Unfree",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "claude-code-2.0.14",
+      "pname": "claude-code",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:20.529855Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "2.0.14",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/s9cn2jql7by4ah98646przvprw7i2pwl-claude-code-2.0.14"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "claude-code",
+      "broken": false,
+      "derivation": "/nix/store/dpw4fp22ljfrf94215w3xlx1h84gkn47-claude-code-2.0.14.drv",
+      "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
+      "install_id": "claude-code",
+      "license": "Unfree",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "claude-code-2.0.14",
+      "pname": "claude-code",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:18.051975Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "2.0.14",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/h3zma18ld6b1mcj2hql48xgk1hn1pgyb-claude-code-2.0.14"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "claude-code",
+      "broken": false,
+      "derivation": "/nix/store/xicpjmrpk14k77ly3vpn74v5ihlxfbp3-claude-code-2.0.14.drv",
+      "description": "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster",
+      "install_id": "claude-code",
+      "license": "Unfree",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "claude-code-2.0.14",
+      "pname": "claude-code",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:46:24.177718Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "2.0.14",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/kk4xmwbcl92vk83cfmgfh45c3a20s8ba-claude-code-2.0.14"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.flask",
+      "broken": false,
+      "derivation": "/nix/store/680gc3har8c4gw7cmgfnaswf9psi0n5w-python3.12-flask-3.1.2.drv",
+      "description": "Python micro framework for building web applications",
+      "install_id": "flask",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-flask-3.1.2",
+      "pname": "flask",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:28.408121Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.1.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/gg57ygq6r4hnv5ic7lsrxwwizaqvhrf7-python3.12-flask-3.1.2-dist",
+        "out": "/nix/store/8cbbdz0ccwa42llzhjn2qkkq77ysipwv-python3.12-flask-3.1.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.flask",
+      "broken": false,
+      "derivation": "/nix/store/wymsbxkpkc1imy4q8zh3j6kgw88k275i-python3.12-flask-3.1.2.drv",
+      "description": "Python micro framework for building web applications",
+      "install_id": "flask",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-flask-3.1.2",
+      "pname": "flask",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:28.338513Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.1.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/48ykb5h6d6wfh8fs96n7625a40cq7616-python3.12-flask-3.1.2-dist",
+        "out": "/nix/store/vc0pbis62fdi5z6z8p0iv93xz0d0k752-python3.12-flask-3.1.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.flask",
+      "broken": false,
+      "derivation": "/nix/store/xgzlyr1qs9w5hqbw1kx3zs8f45d3h591-python3.12-flask-3.1.2.drv",
+      "description": "Python micro framework for building web applications",
+      "install_id": "flask",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-flask-3.1.2",
+      "pname": "flask",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:00.090903Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.1.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/xhcwsj7kjybqmv7msbb7q6n1kdg2mi4r-python3.12-flask-3.1.2-dist",
+        "out": "/nix/store/c93rv4d9dd8hwk2qsjcjs9srs8531vnj-python3.12-flask-3.1.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.flask",
+      "broken": false,
+      "derivation": "/nix/store/2rljpb5adzm3p0x0faxizfs4hivd2v2w-python3.12-flask-3.1.2.drv",
+      "description": "Python micro framework for building web applications",
+      "install_id": "flask",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-flask-3.1.2",
+      "pname": "flask",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:34.892527Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.1.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/2mvx9sxicmyyr0h00acvq5nrcb2wy3b9-python3.12-flask-3.1.2-dist",
+        "out": "/nix/store/9icbiqxb92pcwfxa7cfi10dvm940kmk9-python3.12-flask-3.1.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flink",
+      "broken": false,
+      "derivation": "/nix/store/pz3w9fxb8wmf9qq4nnrng55s0ckx04wi-flink-2.1.0.drv",
+      "description": "Distributed stream processing framework",
+      "install_id": "flink",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "flink-2.1.0",
+      "pname": "flink",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:17:44.163123Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5dzwx1ghmxhkzff36vlvrl57bin4bzcd-flink-2.1.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flink",
+      "broken": false,
+      "derivation": "/nix/store/y5yk7zkbmd7y11fzcxhpimkg97fk8ava-flink-2.1.0.drv",
+      "description": "Distributed stream processing framework",
+      "install_id": "flink",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "flink-2.1.0",
+      "pname": "flink",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:21.416197Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/165404c05zib4qvq49ykk56zgnshkq2f-flink-2.1.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flink",
+      "broken": false,
+      "derivation": "/nix/store/gnb0vlld6v203klqsb08g0k7lb7ainbb-flink-2.1.0.drv",
+      "description": "Distributed stream processing framework",
+      "install_id": "flink",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "flink-2.1.0",
+      "pname": "flink",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:18.594403Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/8a9f3jp2s1x8pn2s0w8s9x3mxvyqxn34-flink-2.1.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flink",
+      "broken": false,
+      "derivation": "/nix/store/8w0kq5fq2aw4jawfqasqbnpsvgyh62w4-flink-2.1.0.drv",
+      "description": "Distributed stream processing framework",
+      "install_id": "flink",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "flink-2.1.0",
+      "pname": "flink",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:46:25.105120Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.1.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/9s6bzhh9bbjwivxf4ssx145q49g95aks-flink-2.1.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.kafka-python",
+      "broken": false,
+      "derivation": "/nix/store/2nnv7dm03y2rxc3dq1gwmjfxlf2dads1-python3.12-kafka-python-ng-2.2.3.drv",
+      "description": "Pure Python client for Apache Kafka",
+      "install_id": "kafka-python",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-kafka-python-ng-2.2.3",
+      "pname": "kafka-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:30.702151Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.2.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/96c9jvkh7dyaf8cn5qc6jpji3s9lrk94-python3.12-kafka-python-ng-2.2.3-dist",
+        "out": "/nix/store/94gqpbk6wdxhj873q3xhyqa7bk0zq38y-python3.12-kafka-python-ng-2.2.3"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.kafka-python",
+      "broken": false,
+      "derivation": "/nix/store/11p3n0whsbyblrqd92yv70ffp7qgp2xa-python3.12-kafka-python-ng-2.2.3.drv",
+      "description": "Pure Python client for Apache Kafka",
+      "install_id": "kafka-python",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-kafka-python-ng-2.2.3",
+      "pname": "kafka-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:31.265346Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.2.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/7m3agfxx5cy60i40p6pd2wk8rdx00h9p-python3.12-kafka-python-ng-2.2.3-dist",
+        "out": "/nix/store/ddsnffdl9p2gcgc3db3kv9hk75hwrn98-python3.12-kafka-python-ng-2.2.3"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.kafka-python",
+      "broken": false,
+      "derivation": "/nix/store/sj9k590hxl86jac9jjfn0w90h6bqr7j9-python3.12-kafka-python-ng-2.2.3.drv",
+      "description": "Pure Python client for Apache Kafka",
+      "install_id": "kafka-python",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-kafka-python-ng-2.2.3",
+      "pname": "kafka-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:02.225390Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.2.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/bwwd5907zs97n4yanxdnv83cy7wfzqiz-python3.12-kafka-python-ng-2.2.3-dist",
+        "out": "/nix/store/d8v6dfalwaf2bk6zlq1glzacc7589pr2-python3.12-kafka-python-ng-2.2.3"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.kafka-python",
+      "broken": false,
+      "derivation": "/nix/store/plyx9n3hs27plhs9gx5v233hqavmg6xz-python3.12-kafka-python-ng-2.2.3.drv",
+      "description": "Pure Python client for Apache Kafka",
+      "install_id": "kafka-python",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-kafka-python-ng-2.2.3",
+      "pname": "kafka-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:37.937595Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.2.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/74m92wkwkys73h32c33pf4wy6rsl64dh-python3.12-kafka-python-ng-2.2.3-dist",
+        "out": "/nix/store/hgx79fcwnn7jcays6csrxnh2vvvlmjc2-python3.12-kafka-python-ng-2.2.3"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openjdk",
+      "broken": false,
+      "derivation": "/nix/store/b7wbccqf9sqwd9093mg3r1fb7fgri4a7-zulu-ca-jdk-21.0.8.drv",
+      "description": "Certified builds of OpenJDK",
+      "install_id": "openjdk",
+      "license": "GPL-2.0-only",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "zulu-ca-jdk-21.0.8",
+      "pname": "openjdk",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:09.785628Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "21.0.8",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/2shlkyladcpv8s5hrs99c7v71bwb5r43-zulu-ca-jdk-21.0.8"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openjdk",
+      "broken": false,
+      "derivation": "/nix/store/acw29fn4wdh9ylmq810ihgsv76bk26i9-openjdk-21.0.8+9.drv",
+      "description": "Open-source Java Development Kit",
+      "install_id": "openjdk",
+      "license": "GPL-2.0-only",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openjdk-21.0.8+9",
+      "pname": "openjdk",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:02.236328Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "21.0.8+9",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/nmb2rbl2kds2bl4b4rqqlynhc5vq10a1-openjdk-21.0.8+9-debug",
+        "out": "/nix/store/n17r40xwp5rvr9b401da08xiv9x9y5mq-openjdk-21.0.8+9"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openjdk",
+      "broken": false,
+      "derivation": "/nix/store/diwpx1r2dqgb48m7cvfxrga236cgnl1l-zulu-ca-jdk-21.0.8.drv",
+      "description": "Certified builds of OpenJDK",
+      "install_id": "openjdk",
+      "license": "GPL-2.0-only",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "zulu-ca-jdk-21.0.8",
+      "pname": "openjdk",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:42.825799Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "21.0.8",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/gfnvnk6mqvihkh81ajnbv6w43m9ss3ki-zulu-ca-jdk-21.0.8"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openjdk",
+      "broken": false,
+      "derivation": "/nix/store/g8pka0i7j0dsz59sd5acl8kycdq5xaa2-openjdk-21.0.8+9.drv",
+      "description": "Open-source Java Development Kit",
+      "install_id": "openjdk",
+      "license": "GPL-2.0-only",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openjdk-21.0.8+9",
+      "pname": "openjdk",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:08.759458Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "21.0.8+9",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/8n7g1dv9cy7xgfwlizhg2cfwj2f4avd8-openjdk-21.0.8+9-debug",
+        "out": "/nix/store/0x556ql275jkl46k6lklpyvwn5c4p244-openjdk-21.0.8+9"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packaging",
+      "broken": false,
+      "derivation": "/nix/store/xxqkyvmqv8p25azf2x5x6rkgdfzwpsc2-python3.12-packaging-25.0.drv",
+      "description": "Core utilities for Python packages",
+      "install_id": "packaging",
+      "license": "[ BSD-2-Clause, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packaging-25.0",
+      "pname": "packaging",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:34.410529Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "25.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/7fbl8wcvv5lvxmpvj7hz25v9crr4jrw9-python3.12-packaging-25.0-dist",
+        "out": "/nix/store/yws8kdik5b7mvfhdjxy0bs632aj5k37l-python3.12-packaging-25.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packaging",
+      "broken": false,
+      "derivation": "/nix/store/8194smyffr666fsym9ykrw3gxadn36vp-python3.12-packaging-25.0.drv",
+      "description": "Core utilities for Python packages",
+      "install_id": "packaging",
+      "license": "[ BSD-2-Clause, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packaging-25.0",
+      "pname": "packaging",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:35.773619Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "25.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/pmmcw1f1jgqjr4a9jrwfq517l376cn0d-python3.12-packaging-25.0-dist",
+        "out": "/nix/store/63h4qzw5lfnkim4bsjfw1v42mm8hjfvi-python3.12-packaging-25.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packaging",
+      "broken": false,
+      "derivation": "/nix/store/akmglid4q47x8arisx4x799dfnj3m8zk-python3.12-packaging-25.0.drv",
+      "description": "Core utilities for Python packages",
+      "install_id": "packaging",
+      "license": "[ BSD-2-Clause, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packaging-25.0",
+      "pname": "packaging",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:05.563380Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "25.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/5mjpar187iavvhmc21flxwm8hknx27hi-python3.12-packaging-25.0-dist",
+        "out": "/nix/store/mmaw12d3cqzms5b61finnqlrrzajv2ag-python3.12-packaging-25.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packaging",
+      "broken": false,
+      "derivation": "/nix/store/0m7sqlmhw375v546mhdc8v0lgn7nxnbw-python3.12-packaging-25.0.drv",
+      "description": "Core utilities for Python packages",
+      "install_id": "packaging",
+      "license": "[ BSD-2-Clause, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packaging-25.0",
+      "pname": "packaging",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:42.639870Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "25.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/7x332hynrm6b055van1cw9wp36a2mbs1-python3.12-packaging-25.0-dist",
+        "out": "/nix/store/9817x9vdn37sczqvdysqbdrjcp93s3v3-python3.12-packaging-25.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312",
+      "broken": false,
+      "derivation": "/nix/store/29x542d0355n2bgnv75nx5v0n1a7kk92-python3-3.12.11.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python312",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3-3.12.11",
+      "pname": "python312",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:23.644614Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.12.11",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/d5bvj78dzx6wjnz13vawcjb3pa5hpdkv-python3-3.12.11"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312",
+      "broken": false,
+      "derivation": "/nix/store/mcdw7jqb27dkmgnwa46gvkcbwagf4yri-python3-3.12.11.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python312",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3-3.12.11",
+      "pname": "python312",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:22.272016Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.12.11",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/vlpgzwscnw0jv7109k2s5z9f9yw3f4ws-python3-3.12.11-debug",
+        "out": "/nix/store/n9fq90ybwm7flzhswka4i8siss56g4hq-python3-3.12.11"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312",
+      "broken": false,
+      "derivation": "/nix/store/2vb0lv7wa6phjh5z7xgnxncfsjqqqilf-python3-3.12.11.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python312",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3-3.12.11",
+      "pname": "python312",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:55.777762Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.12.11",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/lykhqadwwlc89lxiyvpms7hkx1nxznw6-python3-3.12.11"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312",
+      "broken": false,
+      "derivation": "/nix/store/1b6falsf65wlfjlwr3qrjn3baf9i7bqc-python3-3.12.11.drv",
+      "description": "High-level dynamically-typed programming language",
+      "install_id": "python312",
+      "license": "Python-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3-3.12.11",
+      "pname": "python312",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:28.521262Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3-3.12.11",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/h4m4mz0j2iyfj17zmq49n0g5i8zywic6-python3-3.12.11-debug",
+        "out": "/nix/store/27fr7ynpilzb7rzmay73g905jbl8br4a-python3-3.12.11"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}

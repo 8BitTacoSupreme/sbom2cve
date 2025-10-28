@@ -31,8 +31,11 @@ logs/*.log
 /tmp/kafka-logs/
 /tmp/zookeeper/
 
-# Flox
-.flox/
+# Flox runtime/cache (but keep manifest files!)
+.flox/cache/
+.flox/log/
+.flox/run/
+.flox/env.json
 
 # Environment variables
 .env
