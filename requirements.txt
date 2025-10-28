@@ -1,0 +1,8 @@
+# NOTE: kafka-python and packaging are installed via Flox
+# Only install packages not available in Flox via pip
+
+# Apache Flink Python API (not in Flox)
+apache-flink==1.18.0
+
+# For parsing package identifiers (not in Flox)
+packageurl-python==0.11.2

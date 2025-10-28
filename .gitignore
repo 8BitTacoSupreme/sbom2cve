@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/*.log
+
+# Kafka data (if running locally)
+/tmp/kafka-logs/
+/tmp/zookeeper/
+
+# Flox
+.flox/
+
+# Environment variables
+.env
+.env.local
+
+# Test outputs
+*.test
+test_output/
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Unrelated files
+q4-campaigns.csv
+

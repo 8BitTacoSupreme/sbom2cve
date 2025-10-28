@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBOM2CVE Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .severity-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            text-align: center;
+        }
+
+        .severity-card.CRITICAL { border-left-color: #dc2626; }
+        .severity-card.HIGH { border-left-color: #f59e0b; }
+        .severity-card.MEDIUM { border-left-color: #fbbf24; }
+        .severity-card.LOW { border-left-color: #10b981; }
+
+        .severity-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .severity-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .recent-messages {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topic-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #e2e8f0;
+        }
+
+        .tab.active {
+            color: #fff;
+            border-bottom-color: #667eea;
+        }
+
+        .message-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .status-bar {
+            background: #1e293b;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>📊 SBOM2CVE Dashboard</h1>
+            <div class="subtitle">Real-time monitoring of SBOM, CVE, and Alert streams</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Live Monitoring</span>
+            </div>
+            <div class="update-time" id="lastUpdate">Last update: --</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">📦 SBOMs</div>
+                <div class="metric-value" id="sboms-count">0</div>
+                <div class="metric-label">Total messages</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">🔒 CVEs</div>
+                <div class="metric-value" id="cves-count">0</div>
+                <div class="metric-label">Total messages</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">🚨 Alerts</div>
+                <div class="metric-value" id="alerts-count">0</div>
+                <div class="metric-label">Total matches</div>
+            </div>
+        </div>
+
+        <div class="section-title">🔥 Alert Severity Distribution</div>
+        <div class="severity-grid" id="severity-grid">
+            <div class="severity-card CRITICAL">
+                <div class="severity-value" id="severity-CRITICAL">0</div>
+                <div class="severity-label">CRITICAL</div>
+            </div>
+            <div class="severity-card HIGH">
+                <div class="severity-value" id="severity-HIGH">0</div>
+                <div class="severity-label">HIGH</div>
+            </div>
+            <div class="severity-card MEDIUM">
+                <div class="severity-value" id="severity-MEDIUM">0</div>
+                <div class="severity-label">MEDIUM</div>
+            </div>
+            <div class="severity-card LOW">
+                <div class="severity-value" id="severity-LOW">0</div>
+                <div class="severity-label">LOW</div>
+            </div>
+        </div>
+
+        <div class="recent-messages">
+            <div class="section-title">📬 Recent Messages</div>
+            <div class="topic-tabs">
+                <button class="tab active" onclick="switchTab('sboms')">SBOMs</button>
+                <button class="tab" onclick="switchTab('cves')">CVEs</button>
+                <button class="tab" onclick="switchTab('alerts')">Alerts</button>
+            </div>
+            <div class="message-list" id="message-list">
+                <div class="loading">Waiting for messages...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTopic = 'sboms';
+
+        function switchTab(topic) {
+            currentTopic = topic;
+
+            // Update tab styles
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Load messages for topic
+            loadRecentMessages(topic);
+        }
+
+        function updateMetrics() {
+            fetch('/api/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    // Update topic counts
+                    document.getElementById('sboms-count').textContent = data.topics.sboms.count;
+                    document.getElementById('cves-count').textContent = data.topics.cves.count;
+                    document.getElementById('alerts-count').textContent = data.topics.alerts.count;
+
+                    // Update severity counts
+                    const severities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+                    severities.forEach(severity => {
+                        const count = data.severity[severity] || 0;
+                        document.getElementById(`severity-${severity}`).textContent = count;
+                    });
+
+                    // Update last update time
+                    if (data.last_update) {
+                        const date = new Date(data.last_update * 1000);
+                        document.getElementById('lastUpdate').textContent =
+                            `Last update: ${date.toLocaleTimeString()}`;
+                    }
+                })
+                .catch(error => console.error('Error updating metrics:', error));
+        }
+
+        function loadRecentMessages(topic) {
+            fetch(`/api/recent/${topic}`)
+                .then(response => response.json())
+                .then(data => {
+                    const messageList = document.getElementById('message-list');
+
+                    if (data.messages && data.messages.length > 0) {
+                        messageList.innerHTML = data.messages
+                            .slice()
+                            .reverse()
+                            .map(msg => {
+                                const formatted = JSON.stringify(msg, null, 2);
+                                return `<div class="message"><pre>${formatted}</pre></div>`;
+                            })
+                            .join('');
+                    } else {
+                        messageList.innerHTML = '<div class="loading">No messages yet...</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    document.getElementById('message-list').innerHTML =
+                        '<div class="loading">Error loading messages</div>';
+                });
+        }
+
+        // Update metrics every 2 seconds
+        setInterval(updateMetrics, 2000);
+        updateMetrics();
+
+        // Update current topic messages every 3 seconds
+        setInterval(() => {
+            loadRecentMessages(currentTopic);
+        }, 3000);
+        loadRecentMessages(currentTopic);
+    </script>
+</body>
+</html>
