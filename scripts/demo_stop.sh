@@ -1,21 +1,15 @@
 #!/bin/bash
-# Stop the complete SBOM2CVE demo
+# Stop all SBOM2CVE services
 
-set -e
-
-echo "════════════════════════════════════════════════════════════════"
-echo "  Stopping SBOM2CVE Demo..."
-echo "════════════════════════════════════════════════════════════════"
-echo ""
+echo "🛑 Stopping all SBOM2CVE services..."
 
 # Stop Python services
-echo "🐍 Stopping Python services..."
-pkill -f 'python3 src/' 2>/dev/null || echo "   (no Python services running)"
+echo "  Stopping Python services..."
+pkill -f 'python3 src/' && echo "    ✅ Python services stopped" || echo "    ℹ️  No Python services running"
 
 # Stop Kafka
-echo "📦 Stopping Kafka..."
+echo "  Stopping Kafka..."
 ./scripts/kafka_stop.sh
 
 echo ""
-echo "✅ Demo stopped"
-echo ""
+echo "✅ All services stopped!"
