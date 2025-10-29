@@ -329,7 +329,7 @@ class NixCVEProducer:
             cve = random.choice(self.KNOWN_NIX_CVES).copy()
 
             # Add timestamp
-            cve['published'] = datetime.utcnow().isoformat() + "Z"
+            cve['published'] = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
 
             self.send_cve(cve)
             print(f"[{count}] Produced Nix CVE: {cve['cve_id']} ({cve['severity']})")

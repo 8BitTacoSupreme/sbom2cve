@@ -141,7 +141,7 @@ class CVEGenerator:
         cve = random.choice(self.KNOWN_CVES).copy()
 
         # Add some dynamic fields
-        cve["retrieved_at"] = datetime.utcnow().isoformat() + "Z"
+        cve["retrieved_at"] = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
         cve["source"] = "NVD"
 
         return cve

@@ -57,7 +57,7 @@ class SPDXSBOMGenerator:
             "name": f"SBOM for {application_name}",
             "documentNamespace": f"https://example.com/sboms/{uuid.uuid4()}",
             "creationInfo": {
-                "created": datetime.utcnow().isoformat() + "Z",
+                "created": datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z'),
                 "creators": ["Tool: sbom-generator-1.0"],
                 "licenseListVersion": "3.19"
             },

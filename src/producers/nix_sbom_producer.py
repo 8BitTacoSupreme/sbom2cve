@@ -151,7 +151,7 @@ class NixSBOMProducer:
         Returns:
             SPDX 2.3 SBOM dictionary
         """
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
 
         # Create SPDX packages
         spdx_packages = []
