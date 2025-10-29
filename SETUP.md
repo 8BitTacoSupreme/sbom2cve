@@ -1,38 +1,48 @@
 # Setup Guide for SBOM-CVE Matcher
 
+## Overview
+
+This system provides **real-time vulnerability monitoring for Nix/Flox packages**. The default configuration scans your Flox environment and matches against known Nix CVEs.
+
 ## Prerequisites
 
 This project uses **Flox** for environment management. The following are already installed via Flox:
 - kafka-python (Python Kafka client)
-- packaging (Python version parsing)
+- packaging (Python version parsing for semantic versioning)
+- flask (Web dashboard)
 - Python 3.12
 - OpenJDK
 
-## Kafka Setup Options
+## Infrastructure Setup
 
-You have several options to run Kafka:
-
-### Option 1: Docker (Recommended for Testing)
+### Docker Compose (Recommended)
 
 **Prerequisites**: Docker Desktop must be running
 
 ```bash
-# Make sure Docker Desktop is running, then:
-chmod +x scripts/start_kafka_docker.sh
-./scripts/start_kafka_docker.sh
+./scripts/start_infrastructure.sh
 ```
 
-This will:
-- Start Zookeeper and Kafka in Docker containers
-- Create topics: `sboms`, `cves`, `alerts`
-- Kafka will be available at `localhost:9092`
+This starts:
+- **Kafka Broker** (localhost:9092) - Using Confluent Platform with KRaft (no Zookeeper)
+- **Schema Registry** (localhost:8081) - Schema management
+- **Flink JobManager** (localhost:9081) - Stream processing UI
+- **Flink TaskManager** - Processing engine
+
+Topics are automatically created:
+- `sboms` - SPDX 2.3 format SBOMs (3 partitions)
+- `cves` - CVE records with affected products (3 partitions)
+- `alerts` - Matched vulnerabilities (3 partitions)
 
 **To stop**:
 ```bash
-docker stop kafka zookeeper
+docker compose down
+
+# Remove data volumes
+docker compose down -v
 ```
 
-### Option 2: Manual Kafka Installation via Flox
+### Alternative: Manual Kafka Installation via Flox
 
 The `apacheKafka` package is installed via Flox, but the scripts need to be located. You can run Kafka manually:
 
@@ -60,101 +70,175 @@ The `apacheKafka` package is installed via Flox, but the scripts need to be loca
    <kafka-dir>/bin/kafka-topics.sh --create --topic alerts --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
    ```
 
-### Option 3: Homebrew (macOS)
-
-If you prefer to use Homebrew:
-
-```bash
-brew install kafka
-brew services start zookeeper
-brew services start kafka
-
-# Create topics
-kafka-topics --create --topic sboms --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
-kafka-topics --create --topic cves --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
-kafka-topics --create --topic alerts --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
-```
-
 ## Running the Application
 
-Once Kafka is running, you need **4 terminal windows**:
+### Quick Start (Nix/Flox Mode - Default)
 
-### Terminal 1: SBOM Producer
+Once infrastructure is running, start all services:
+
 ```bash
-python3 src/producers/sbom_producer.py
+./scripts/start_all.sh
 ```
 
-### Terminal 2: CVE Producer
+This automatically starts:
+1. **Nix SBOM Producer** - Scans your Flox environment via `flox list` (every 10s)
+2. **Nix CVE Producer** - Publishes known Nix CVEs (every 7s)
+3. **PURL Matcher** - Matches packages against CVEs with 95% confidence
+4. **Alert Consumer** - Displays vulnerability alerts
+5. **Dashboard** - Web UI at http://localhost:5001
+
+**View Dashboard**: Open http://localhost:5001
+
+**View Logs**:
 ```bash
-python3 src/producers/cve_producer.py
+tail -f logs/matcher.log          # Matching activity
+tail -f logs/alert_consumer.log   # Formatted alerts
+tail -f logs/sbom_producer.log    # SBOM generation
+tail -f logs/cve_producer.log     # CVE publishing
 ```
 
-### Terminal 3: Matcher (Python-based, no Flink needed)
+### Manual Service Control (Optional)
+
+If you prefer to run services individually:
+
 ```bash
-python3 src/matchers/simple_matcher.py
+source venv/bin/activate
+
+# Nix SBOM Producer (scans Flox environment)
+python3 src/producers/nix_sbom_producer.py --interval 10 &
+
+# Nix CVE Producer
+python3 src/producers/nix_cve_producer.py --interval 7 &
+
+# Matcher
+python3 src/matchers/simple_matcher.py &
+
+# Alert Consumer
+python3 src/consumers/alert_consumer.py &
+
+# Dashboard
+python3 src/dashboard/dashboard.py &
 ```
 
-### Terminal 4: Alert Consumer
+### Testing Mode (Sample Data)
+
+To test without scanning your Flox environment:
+
 ```bash
-python3 src/consumers/alert_consumer.py
+python3 src/producers/nix_sbom_producer.py --use-samples --interval 10
 ```
 
 ## Expected Output
 
 You should see:
 
-1. **SBOM Producer**: Generating and sending SBOMs every 5 seconds
-2. **CVE Producer**: Generating and sending CVEs every 3 seconds
-3. **Matcher**: Receiving SBOMs and CVEs, performing matching
-4. **Alert Consumer**: Displaying formatted vulnerability alerts when matches are found
+1. **Nix SBOM Producer**: Scanning Flox environment every 10 seconds
+2. **Nix CVE Producer**: Publishing Nix CVEs every 7 seconds
+3. **Matcher**: Performing high-confidence PURL-based matching
+4. **Alert Consumer**: Displaying vulnerability alerts for your Flox packages
+5. **Dashboard**: Real-time visualization at http://localhost:5001
 
-Example alert:
+Example alert for Nix package:
 ```
 ================================================================================
-🚨 VULNERABILITY ALERT - CVE-2021-44228
+🚨 VULNERABILITY ALERT - CVE-2021-40330
 ================================================================================
-CVE ID:           CVE-2021-44228
+CVE ID:           CVE-2021-40330
 Severity:         CRITICAL
-CVSS Score:       10.0
+CVSS Score:       9.8
 Confidence:       95.0%
 Match Method:     purl_version_range
 
 Affected Package:
-  Name:           log4j-core
-  Version:        2.14.1
-  PURL:           pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1
+  Name:           git
+  Version:        2.33.0
+  PURL:           pkg:nix/nixpkgs/git@2.33.0
+
+Description:
+  git_connect_git in connect.c allows repository path to contain newline
+  character, resulting in unexpected cross-protocol requests
+
+References:
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-40330
 ================================================================================
 ```
 
 ## Troubleshooting
 
 ### Kafka Connection Issues
-- Ensure Kafka is running: `docker ps` (if using Docker)
-- Check Kafka is listening on port 9092: `netstat -an | grep 9092`
-- Verify topics exist: `docker exec kafka kafka-topics --list --bootstrap-server localhost:9092`
+```bash
+# Check Docker containers
+docker ps | grep broker
 
-### Python Import Errors
-- Verify packages are installed:
-  ```bash
-  python3 -c "import kafka; import packaging; print('OK')"
-  ```
-- If needed, check Flox packages:
-  ```bash
-  flox list | grep python
-  ```
+# Check Kafka is listening
+lsof -i :9092
+
+# Verify topics exist
+docker exec broker kafka-topics --list --bootstrap-server localhost:9092
+
+# Restart infrastructure if needed
+docker compose down && ./scripts/start_infrastructure.sh
+```
+
+### Python Service Issues
+```bash
+# Check running services
+pgrep -lf "python3 src/"
+
+# Stop all services
+pkill -f 'python3 src/'
+
+# Restart services
+./scripts/start_all.sh
+```
+
+### No Flox Packages Found
+```bash
+# Verify Flox is available
+flox --version
+
+# Check current environment
+flox list
+
+# If no environment active, the system will use sample Nix packages
+```
 
 ### No Alerts Appearing
-- Check that all 4 components are running
-- Verify the matcher is receiving messages (check its console output)
-- Check Kafka topics have data:
-  ```bash
-  docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic sboms --from-beginning --max-messages 1
-  ```
+```bash
+# Check matcher logs for errors
+tail -50 logs/matcher.log | grep -i error
+
+# Verify messages in topics
+docker exec broker kafka-console-consumer --bootstrap-server localhost:9092 \
+  --topic sboms --from-beginning --max-messages 1
+
+# Restart matcher
+pkill -f simple_matcher
+source venv/bin/activate
+python3 src/matchers/simple_matcher.py > logs/matcher.log 2>&1 &
+```
+
+## Validation
+
+Run the automated test:
+```bash
+./test_nix_integration.sh
+```
+
+Or follow the complete validation guide: **[VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)**
 
 ## Next Steps
 
 After verifying the system works:
-1. Modify CVEs in `src/producers/cve_producer.py` to add more vulnerabilities
-2. Modify SBOM packages in `src/producers/sbom_producer.py` to test different scenarios
-3. Adjust matching logic in `src/matchers/simple_matcher.py` for custom rules
-4. Integrate with real CVE feeds (NVD, OSV, etc.)
+1. **Monitor your Flox environment**: The system is now scanning your packages automatically
+2. **Add custom CVEs**: Edit `src/producers/nix_cve_producer.py`
+3. **Integrate with NVD**: Fetch CVEs automatically from NVD API
+4. **Enable SBOM signatures**: Add cryptographic verification
+5. **Scale up**: Add more Kafka brokers and consumers for production
+
+## Documentation
+
+- **[README.md](README.md)** - System overview and quick start
+- **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** - Technical details on Nix/Flox integration
+- **[RUNNING.md](RUNNING.md)** - Current system status
+- **[VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)** - Testing procedures

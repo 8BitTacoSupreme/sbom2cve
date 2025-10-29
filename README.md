@@ -1,25 +1,35 @@
 # SBOM-to-CVE Vulnerability Matcher
 
-A real-time vulnerability detection system that matches Software Bill of Materials (SBOMs) against CVE data streams using Apache Kafka and Apache Flink.
+A real-time vulnerability detection system for **Nix and Flox packages** that matches Software Bill of Materials (SBOMs) against CVE data streams using Apache Kafka.
 
 ## Overview
 
-This application demonstrates intelligent vulnerability matching by:
+This application provides **high-confidence vulnerability monitoring for Flox environments** by:
 
-1. **Generating SPDX-compliant SBOMs** - Produces realistic SBOM documents with Package URLs (PURLs)
-2. **Streaming CVE data** - Simulates CVE feed with known vulnerabilities
-3. **Intelligent matching with Flink** - Uses PURL-based matching with semantic version comparison for high-confidence alerts
-4. **Real-time alerting** - Sends vulnerability alerts to a Kafka topic for downstream processing
+1. **Scanning Flox environments** - Automatically generates SPDX 2.3 SBOMs from your active Flox environment via `flox list`
+2. **Streaming Nix CVE data** - Monitors known vulnerabilities affecting common Nix packages (openssl, curl, git, nginx, python3, nodejs, etc.)
+3. **Intelligent PURL-based matching** - Uses Package URL matching with semantic version comparison for zero false positives
+4. **Real-time alerting** - Immediate notification when vulnerabilities are detected in your environment
 
 ## Key Features
+
+### Optimized for Nix/Flox Ecosystem
+
+The system is specifically designed for Nix packages with:
+
+- **Ecosystem Isolation**: `pkg:nix/nixpkgs/*` PURLs only match Nix CVEs, preventing false positives from other ecosystems
+- **Flox Environment Integration**: Direct scanning of your Flox environment via `flox list`
+- **Curated Nix CVE Database**: Real vulnerabilities affecting common Nix packages
+- **SBOM Attestation Ready**: SPDX 2.3 format compatible with cryptographic signing
 
 ### High-Confidence Matching
 
 Unlike simple text-based matching, this system uses:
 
-- **Package URL (PURL) matching**: Structured package identifiers (e.g., `pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1`)
-- **Semantic version range checking**: Understands version constraints like `>=2.0 <2.15.0`
+- **Package URL (PURL) matching**: Structured Nix package identifiers (e.g., `pkg:nix/nixpkgs/openssl@3.0.7`)
+- **Semantic version range checking**: Understands version constraints like `>=3.0.0 <3.0.7`
 - **Confidence scoring**: Each match includes a confidence score (0.95 for PURL+version range matches)
+- **Zero Cross-Ecosystem False Positives**: Maven openssl won't match Nix openssl
 
 ### SPDX 2.3 Compliance
 
@@ -31,29 +41,37 @@ SBOMs are generated in the industry-standard SPDX 2.3 JSON format with:
 ## Architecture
 
 ```
-┌─────────────────┐         ┌─────────────────┐
-│  SBOM Producer  │────────>│  Kafka: sboms   │
-│  (Python)       │         └─────────┬───────┘
-└─────────────────┘                   │
-                                      │
-                                      v
-                            ┌──────────────────────┐
-                            │                      │
-                            │   Flink Job          │
-┌─────────────────┐         │   SBOM-CVE Matcher   │
-│  CVE Producer   │────────>│   (PURL + Version)   │
-│  (Python)       │         │                      │
-└─────────────────┘         └──────────┬───────────┘
-        ^                              │
-        │                              v
-  Kafka: cves              ┌─────────────────────┐
+┌─────────────────────┐
+│  Flox Environment   │
+│   (flox list)       │
+└──────────┬──────────┘
+           │
+           v
+┌─────────────────────┐         ┌─────────────────┐
+│ Nix SBOM Producer   │────────>│  Kafka: sboms   │
+│ pkg:nix/nixpkgs/*   │         └─────────┬───────┘
+└─────────────────────┘                   │
+                                          │
+                                          v
+                            ┌──────────────────────────┐
+                            │                          │
+                            │   PURL Matcher           │
+┌─────────────────────┐     │   (Python)               │
+│  Nix CVE Producer   │────>│   - Type filtering       │
+│  Curated Nix CVEs   │     │   - Semantic versioning  │
+└─────────────────────┘     │   - 95% confidence       │
+        ^                   └──────────┬───────────────┘
+        │                              │
+  Kafka: cves                          v
+                           ┌─────────────────────┐
                            │  Kafka: alerts      │
                            └──────────┬──────────┘
                                       │
                                       v
                             ┌─────────────────────┐
-                            │  Alert Consumer     │
-                            │  (Python)           │
+                            │  Alert Consumer +   │
+                            │  Dashboard          │
+                            │  (Python/Flask)     │
                             └─────────────────────┘
 ```
 
@@ -88,117 +106,159 @@ This will:
 - Start Kafka
 - Create topics: `sboms`, `cves`, `alerts`
 
-## Running the Application
+## Quick Start
 
-You'll need **4 terminal windows** (all within the Flox environment):
-
-### Terminal 1: SBOM Producer
+### 1. Start Infrastructure (Docker)
 
 ```bash
-python3 src/producers/sbom_producer.py
+./scripts/start_infrastructure.sh
 ```
 
-Options:
-- `--bootstrap-servers`: Kafka servers (default: localhost:9092)
-- `--topic`: Topic name (default: sboms)
-- `--interval`: Seconds between SBOMs (default: 5)
+This starts Kafka, Schema Registry, and Flink using Docker Compose.
 
-### Terminal 2: CVE Producer
+### 2. Start All Services (Nix/Flox mode by default)
 
 ```bash
-python3 src/producers/cve_producer.py
+./scripts/start_all.sh
 ```
 
-Options:
-- `--bootstrap-servers`: Kafka servers (default: localhost:9092)
-- `--topic`: Topic name (default: cves)
-- `--interval`: Seconds between CVEs (default: 3)
+This automatically starts:
+- **Nix SBOM Producer** - Scans your Flox environment every 10 seconds
+- **Nix CVE Producer** - Publishes Nix CVEs every 7 seconds
+- **PURL Matcher** - Matches packages against CVEs with 95% confidence
+- **Alert Consumer** - Displays vulnerability alerts
+- **Dashboard** - Real-time visualization at http://localhost:5001
 
-### Terminal 3: Flink Matching Job
+### 3. View Results
+
+Open http://localhost:5001 to see:
+- Real-time message counts
+- Vulnerability severity distribution
+- Recent alerts and matches
+
+Or view logs:
+```bash
+tail -f logs/matcher.log          # See matching activity
+tail -f logs/alert_consumer.log   # See formatted alerts
+```
+
+## Manual Operation (Optional)
+
+If you prefer to run services individually:
+
+### Nix SBOM Producer (Flox Environment Mode)
 
 ```bash
-python3 src/flink_jobs/sbom_cve_matcher.py
+python3 src/producers/nix_sbom_producer.py --interval 10
 ```
 
-This starts the Flink job that:
-- Consumes from `sboms` and `cves` topics
-- Performs intelligent PURL+version matching
-- Produces alerts to `alerts` topic
+This scans your current Flox environment via `flox list`.
 
-### Terminal 4: Alert Consumer
+### Nix CVE Producer
 
 ```bash
-python3 src/consumers/alert_consumer.py
+python3 src/producers/nix_cve_producer.py --interval 7
 ```
 
-Options:
-- `--bootstrap-servers`: Kafka servers (default: localhost:9092)
-- `--topic`: Topic name (default: alerts)
+### Testing with Sample Data
+
+To test without scanning your Flox environment:
+
+```bash
+python3 src/producers/nix_sbom_producer.py --use-samples --interval 10
+```
 
 ## Example Alert Output
 
 ```
 ================================================================================
-🚨 VULNERABILITY ALERT - CVE-2021-44228
+🚨 VULNERABILITY ALERT - CVE-2021-40330
 ================================================================================
-Alert ID:         SPDXRef-DOCUMENT-abc123-CVE-2021-44228
-Timestamp:        1634567890000
-SBOM:             SBOM for web-app-frontend
+Alert ID:         flox-current-env-CVE-2021-40330
+Timestamp:        2024-10-29T14:32:15Z
+SBOM:             SBOM for flox-current-env
 
-CVE ID:           CVE-2021-44228
+CVE ID:           CVE-2021-40330
 Severity:         CRITICAL
-CVSS Score:       10.0
+CVSS Score:       9.8
 Confidence:       95.0%
 Match Method:     purl_version_range
 
 Affected Package:
-  Name:           log4j-core
-  Version:        2.14.1
-  PURL:           pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1
+  Name:           git
+  Version:        2.33.0
+  PURL:           pkg:nix/nixpkgs/git@2.33.0
 
 Description:
-  Apache Log4j2 JNDI features do not protect against attacker controlled
-  LDAP and other JNDI related endpoints
+  git_connect_git in connect.c in Git before 2.30.1 allows a repository
+  path to contain a newline character, which may result in unexpected
+  cross-protocol requests, as demonstrated by the git://localhost:1234/%0d%0a
+  in a submodule URL
 
 References:
-  - https://nvd.nist.gov/vuln/detail/CVE-2021-44228
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-40330
+  - https://github.com/git/git/security/advisories/GHSA-r87g-vxf6-wm4w
 ================================================================================
 ```
 
 ## How the Matching Works
 
-### 1. Package Identity Matching
+### 1. Ecosystem Isolation (PURL Type Filtering)
 
-The system normalizes PURLs for comparison:
+The system normalizes PURLs for comparison, preserving ecosystem types:
 
 ```
-pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1
-  → maven:org.apache.logging.log4j:log4j-core
+pkg:nix/nixpkgs/git@2.33.0
+  → nix:nixpkgs:git
+
+pkg:maven/org.apache/git@2.33.0
+  → maven:org.apache:git
 ```
 
-### 2. Version Range Checking
+These won't match because `nix:nixpkgs:git ≠ maven:org.apache:git`
+
+### 2. Version Range Checking (Semantic Versioning)
 
 CVEs specify affected version ranges:
-- `>=2.0-beta9 <2.15.0` - Affected versions
-- `2.14.1` - Package version from SBOM
+- `>=2.0.0 <2.30.1` - Affected versions
+- `2.33.0` - Package version from SBOM
+- **Result**: NO MATCH (version 2.33.0 is >= 2.30.1)
+
+- `>=2.30.0 <2.34.0` - Affected versions
+- `2.33.0` - Package version from SBOM
 - **Result**: MATCH ✓ (confidence: 0.95)
 
 ### 3. Alert Generation
 
 Only high-confidence matches generate alerts, including:
 - CVE details (ID, severity, CVSS score)
-- Affected package information
-- Confidence score
+- Affected package information from your Flox environment
+- Confidence score (95% for PURL+version matches)
 - References for remediation
+
+### Why This Prevents False Positives
+
+Traditional vulnerability scanners often match by package name alone, leading to false positives like:
+- ❌ Maven's `git` library matching CVEs for the Git VCS
+- ❌ PyPI's `openssl` wrapper matching CVEs for the C library
+
+This system uses PURLs to ensure:
+- ✅ Only `pkg:nix/nixpkgs/git` matches Nix git CVEs
+- ✅ Only `pkg:nix/nixpkgs/openssl` matches Nix openssl CVEs
+- ✅ Semantic version ranges ensure precise matching
 
 ## Stopping the Application
 
-1. Stop all Python processes (Ctrl+C in each terminal)
-2. Stop Kafka and Zookeeper:
-   ```bash
-   # Use PIDs from setup_kafka.sh output
-   kill <KAFKA_PID> <ZOOKEEPER_PID>
-   ```
+```bash
+# Stop all Python services
+pkill -f 'python3 src/'
+
+# Stop Docker infrastructure
+docker compose down
+
+# Stop everything and remove data
+docker compose down -v
+```
 
 ## Development
 
@@ -208,53 +268,66 @@ Only high-confidence matches generate alerts, including:
 sbom2cve/
 ├── src/
 │   ├── producers/
-│   │   ├── sbom_producer.py    # SPDX SBOM generator
-│   │   └── cve_producer.py     # CVE data generator
-│   ├── flink_jobs/
-│   │   └── sbom_cve_matcher.py # Flink matching logic
-│   └── consumers/
-│       └── alert_consumer.py   # Alert display
+│   │   ├── nix_sbom_producer.py    # Nix/Flox SBOM generator (DEFAULT)
+│   │   ├── nix_cve_producer.py     # Nix CVE database (DEFAULT)
+│   │   ├── sbom_producer.py        # Multi-ecosystem SBOM samples
+│   │   └── cve_producer.py         # Multi-ecosystem CVE samples
+│   ├── matchers/
+│   │   └── simple_matcher.py       # Python-based PURL matcher
+│   ├── consumers/
+│   │   └── alert_consumer.py       # Alert display
+│   └── dashboard/
+│       └── dashboard.py            # Flask web dashboard
 ├── scripts/
-│   └── setup_kafka.sh          # Kafka setup script
-├── config/                     # Configuration files
-├── data/                       # Data files
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+│   ├── start_infrastructure.sh     # Start Docker services
+│   └── start_all.sh                # Start all Python services (Nix mode)
+├── logs/                           # Application logs
+├── requirements.txt                # Python dependencies
+├── NIX_INTEGRATION.md              # Nix/Flox documentation
+├── RUNNING.md                      # System status
+└── README.md                       # This file
 ```
 
-### Adding New CVEs
+### Adding New Nix CVEs
 
-Edit `src/producers/cve_producer.py` and add entries to the `KNOWN_CVES` list with:
+Edit `src/producers/nix_cve_producer.py` and add entries to the CVE list with:
 - CVE ID
-- Affected products with PURLs
-- Version ranges
+- Affected Nix packages with PURLs (`pkg:nix/nixpkgs/{package}`)
+- Version ranges using semantic versioning
 - Severity and CVSS score
 
-### Adding New SBOM Packages
+### Customizing SBOM Generation
 
-Edit `src/producers/sbom_producer.py` and add entries to `SAMPLE_PACKAGES` with:
-- Package name
-- Version
-- PURL (Package URL)
+The Nix SBOM producer automatically scans your Flox environment. To customize:
+- Modify `get_flox_packages()` in `src/producers/nix_sbom_producer.py`
+- Or use `--use-samples` flag for testing with predefined packages
 
 ## Technology Stack
 
-- **Apache Kafka**: Distributed streaming platform
-- **Apache Flink**: Stream processing framework
-- **Python 3.12**: Implementation language
-- **SPDX 2.3**: SBOM format standard
-- **Package URLs (PURL)**: Package identifier specification
+- **Apache Kafka**: Distributed streaming platform for real-time data
+- **Python 3.12**: Implementation language (via Flox)
+- **SPDX 2.3**: Industry-standard SBOM format
+- **Package URLs (PURL)**: Structured package identifiers with ecosystem isolation
 - **Flox**: Environment and dependency management
+- **Flask**: Web dashboard framework
+
+## Documentation
+
+- **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** - Complete technical documentation of Nix/Flox integration
+- **[RUNNING.md](RUNNING.md)** - Current system status and service details
+- **[VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)** - Testing and validation procedures
+- **[test_nix_integration.sh](test_nix_integration.sh)** - Automated test script
 
 ## Future Enhancements
 
-- [ ] Integration with real NVD CVE feeds
-- [ ] Support for additional SBOM formats (CycloneDX)
-- [ ] Machine learning for fuzzy package matching
-- [ ] Web dashboard for alert visualization
+- [ ] Integration with NVD API for automatic Nix CVE updates
+- [ ] Vulnix integration for cross-referencing
+- [ ] FloxHub-specific package metadata support
+- [ ] Cryptographic SBOM signature verification
+- [ ] Support for CycloneDX format
 - [ ] Alert deduplication and aggregation
-- [ ] Integration with ticketing systems
-- [ ] Historical trend analysis
+- [ ] Historical vulnerability trend analysis
+- [ ] Slack/Discord webhook notifications
 
 ## License
 

@@ -14,15 +14,15 @@ source venv/bin/activate
 echo "🚀 Starting all SBOM2CVE components..."
 echo ""
 
-# Start SBOM Producer
-echo "📦 Starting SBOM Producer..."
-python3 src/producers/sbom_producer.py > logs/sbom_producer.log 2>&1 &
+# Start Nix SBOM Producer (using Flox environment by default)
+echo "📦 Starting Nix SBOM Producer (Flox environment mode)..."
+python3 src/producers/nix_sbom_producer.py --interval 10 > logs/sbom_producer.log 2>&1 &
 SBOM_PID=$!
 echo "   PID: $SBOM_PID"
 
-# Start CVE Producer
-echo "🔒 Starting CVE Producer..."
-python3 src/producers/cve_producer.py > logs/cve_producer.log 2>&1 &
+# Start Nix CVE Producer
+echo "🔒 Starting Nix CVE Producer..."
+python3 src/producers/nix_cve_producer.py --interval 7 > logs/cve_producer.log 2>&1 &
 CVE_PID=$!
 echo "   PID: $CVE_PID"
 

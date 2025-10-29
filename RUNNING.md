@@ -2,7 +2,7 @@
 
 ## Status: ✅ All Services Operational
 
-The complete SBOM2CVE system is now running and processing messages in real-time.
+The complete SBOM2CVE system is now running with **Nix/Flox integration as the default**, processing vulnerability alerts for your Flox environment in real-time.
 
 ## Infrastructure Services (Docker)
 
@@ -15,13 +15,16 @@ The complete SBOM2CVE system is now running and processing messages in real-time
 
 All services running in virtual environment (`venv/`)
 
-- **SBOM Producer** - Generating SPDX 2.3 SBOMs every 5 seconds
+- **Nix SBOM Producer** - Scanning Flox environment and generating SPDX 2.3 SBOMs every 10 seconds
   - Log: `logs/sbom_producer.log`
   - Topic: `sboms`
+  - PURL Format: `pkg:nix/nixpkgs/{package}@{version}`
+  - Source: Current Flox environment (via `flox list`)
 
-- **CVE Producer** - Generating CVE records every 3 seconds
+- **Nix CVE Producer** - Publishing Nix package vulnerabilities every 7 seconds
   - Log: `logs/cve_producer.log`
   - Topic: `cves`
+  - Coverage: Real CVEs for common Nix packages (openssl, curl, git, nginx, python3, nodejs, etc.)
 
 - **Python Matcher** - Intelligent PURL-based matching with semantic versioning
   - Log: `logs/matcher.log`
@@ -45,29 +48,34 @@ All services running in virtual environment (`venv/`)
 ## Message Flow
 
 ```
-SBOM Producer ──> sboms topic ──┐
-                                 ├──> Python Matcher ──> alerts topic ──> Alert Consumer
-CVE Producer  ──> cves topic  ──┘                                    ├──> Dashboard
+Flox Environment (flox list)
+       ↓
+Nix SBOM Producer ──> sboms topic ──┐
+                                     ├──> Python Matcher ──> alerts topic ──> Alert Consumer
+Nix CVE Producer  ──> cves topic  ──┘                                    ├──> Dashboard
 ```
 
 ## Matching Logic
 
-The system uses high-confidence PURL-based matching:
+The system uses high-confidence PURL-based matching optimized for Nix packages:
 
 1. **Package URL (PURL) normalization** - Matches package type, namespace, and name
+   - Nix PURLs: `pkg:nix/nixpkgs/{package}@{version}`
+   - Ecosystem isolation: Only Nix packages match Nix CVEs
 2. **Semantic version range checking** - Uses Python `packaging` library for version constraints
 3. **Confidence scoring** - 95% confidence for PURL + version range matches
 
-## Confirmed Matches
+## Confirmed Nix Package Matches
 
-The system is successfully detecting vulnerabilities:
+The system is successfully detecting vulnerabilities in your Flox environment:
 
-- ✅ CVE-2021-44228 (Log4Shell) affecting log4j-core
-- ✅ CVE-2021-45046 affecting log4j-core
-- ✅ CVE-2022-42003 affecting jackson-databind
-- ✅ CVE-2022-32149 affecting golang.org/x/text
-- ✅ CVE-2020-36518 affecting jackson-databind
-- ✅ CVE-2022-42889 affecting commons-text
+- ✅ CVE-2021-22946 (HIGH) - curl TELNET stack disclosure
+- ✅ CVE-2021-40330 (CRITICAL) - git remote code execution
+- ✅ CVE-2021-23017 (HIGH) - nginx resolver vulnerability
+- ✅ CVE-2021-29921 (CRITICAL) - python3 ipaddress issue
+- ✅ CVE-2021-44531 (MEDIUM) - nodejs HTTP headers
+- ✅ CVE-2022-3786 (HIGH) - openssl X.509 buffer overflow
+- ✅ CVE-2022-3602 (HIGH) - openssl X.509 vulnerability
 
 ## Viewing Logs
 
@@ -123,35 +131,51 @@ docker compose down -v
 - **Platform**: Confluent Platform (Kafka 8.0.0 with KRaft - no Zookeeper needed)
 - **Stream Processing**: Python-based matcher with threading
 - **Data Format**: SPDX 2.3 JSON for SBOMs
-- **Matching**: PURL-based with semantic versioning (supports Maven, NPM, PyPI, Golang, **Nix/Flox**)
+- **Primary Use Case**: **Nix/Flox package vulnerability monitoring**
+- **Matching**: PURL-based with semantic versioning (optimized for Nix packages, also supports Maven, NPM, PyPI, Golang)
 - **Dashboard**: Flask web application with real-time updates
 
-## Nix/Flox Integration
+## Why Nix/Flox as Default?
 
-The system now supports Nix packages from the nixpkgs and floxhub ecosystems! See **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** for details.
+The system is now **optimized for the Nix/Flox ecosystem** with:
 
-**Nix Producers**:
-- `src/producers/nix_sbom_producer.py` - Generate SBOMs from Flox environments or samples
-- `src/producers/nix_cve_producer.py` - Real CVEs affecting common Nix packages
+1. **High-Confidence Matching**: PURL type filtering prevents cross-ecosystem false positives
+   - `pkg:nix/*` only matches Nix CVEs
+   - `pkg:maven/*` won't match `pkg:nix/*` packages
+2. **Real Flox Environment Scanning**: Directly scans your active Flox environment via `flox list`
+3. **Curated CVE Database**: Real vulnerabilities affecting common Nix packages
+4. **SBOM Attestation Ready**: SPDX 2.3 format compatible with cryptographic signing
 
-**Start Nix Producers**:
+See **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** for complete technical details.
+
+## Using Other Ecosystems (Optional)
+
+To switch back to multi-ecosystem mode with sample data:
+
 ```bash
-# From venv
-source venv/bin/activate
+# Stop current services
+pkill -f 'python3 src/'
 
-# Nix SBOM producer (sample mode)
-python3 src/producers/nix_sbom_producer.py --use-samples --interval 10 &
+# Edit scripts/start_all.sh to use:
+# python3 src/producers/sbom_producer.py (instead of nix_sbom_producer.py)
+# python3 src/producers/cve_producer.py (instead of nix_cve_producer.py)
 
-# Nix CVE producer
-python3 src/producers/nix_cve_producer.py --interval 7 &
+# Restart
+./scripts/start_all.sh
 ```
 
-**Verified Nix Matches**:
-- ✅ CVE-2021-22946 (HIGH) - curl TELNET disclosure
-- ✅ CVE-2021-40330 (CRITICAL) - Git RCE
-- ✅ CVE-2021-23017 (HIGH) - nginx resolver vulnerability
-- ✅ CVE-2021-29921 (CRITICAL) - Python ipaddress issue
-- ✅ CVE-2021-44531 (MEDIUM) - Node.js HTTP headers
+## Testing with Sample Nix Data
+
+To test without using your real Flox environment:
+
+```bash
+# Stop current producers
+pkill -f 'nix_sbom_producer'
+
+# Start with sample data
+source venv/bin/activate
+python3 src/producers/nix_sbom_producer.py --use-samples --interval 10 &
+```
 
 ## Next Steps
 
