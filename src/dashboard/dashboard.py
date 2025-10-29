@@ -153,7 +153,7 @@ def get_recent(topic):
     })
 
 
-def start_dashboard(host='0.0.0.0', port=5000):
+def start_dashboard(host='0.0.0.0', port=5001):
     """Start the dashboard server"""
     print(f"🚀 Starting dashboard on http://{host}:{port}")
 
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SBOM2CVE Monitoring Dashboard')
     parser.add_argument('--host', default='0.0.0.0', help='Dashboard host')
-    parser.add_argument('--port', type=int, default=5000, help='Dashboard port')
+    parser.add_argument('--port', type=int, default=5001, help='Dashboard port')
     parser.add_argument('--bootstrap-servers', default='localhost:9092',
                         help='Kafka bootstrap servers')
 
