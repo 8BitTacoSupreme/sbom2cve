@@ -1,5 +1,6 @@
 #!/bin/bash
 # Start all SBOM2CVE components
+# NOTE: Run this inside a Flox environment (flox activate)
 
 set -e
 
@@ -8,8 +9,8 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-# Activate virtual environment
-source venv/bin/activate
+# Ensure logs directory exists
+mkdir -p logs
 
 echo "🚀 Starting all SBOM2CVE components..."
 echo ""

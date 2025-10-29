@@ -1,8 +1,23 @@
-# NOTE: kafka-python and packaging are installed via Flox
-# Only install packages not available in Flox via pip
-
-# Apache Flink Python API (not in Flox)
-apache-flink==1.18.0
-
-# For parsing package identifiers (not in Flox)
-packageurl-python==0.11.2
+# ⚠️  LEGACY FILE - NOT NEEDED FOR FLOX USERS ⚠️
+#
+# This project is now 100% Flox-managed. All dependencies are in:
+#   .flox/env/manifest.toml
+#
+# If you're using Flox (recommended):
+#   1. flox activate
+#   2. ./scripts/demo_start.sh
+#   That's it! No pip install needed.
+#
+# This file is kept for historical reference only.
+#
+# ════════════════════════════════════════════════════════════════
+#
+# Legacy pip dependencies (now available via Flox):
+# - kafka-python         → python312Packages.kafka-python
+# - packaging            → python312Packages.packaging
+# - flask                → python312Packages.flask
+# - packageurl-python    → python312Packages.packageurl-python
+#
+# Not needed anymore:
+# - apache-flink         → Only used by src/flink_jobs/* (unused)
+#                          System uses src/matchers/simple_matcher.py

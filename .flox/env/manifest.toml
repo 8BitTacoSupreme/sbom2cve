@@ -18,19 +18,24 @@ version = 1
 claude-code.pkg-path = "claude-code"
 apacheKafka.pkg-path = "apacheKafka"
 python312.pkg-path = "python312"
-flink.pkg-path = "flink"
 openjdk.pkg-path = "openjdk"
+# Python packages - all via Flox (no pip needed!)
 kafka-python.pkg-path = "python312Packages.kafka-python"
 packaging.pkg-path = "python312Packages.packaging"
 flask.pkg-path = "python312Packages.flask"
-# gum.pkg-path = "gum"
-# gum.version = "^0.14.5"
+packageurl-python.pkg-path = "python312Packages.packageurl-python"
 
 [hook]
 on-activate = '''
 #!/bin/bash
-# Initialize Claude context directory
-mkdir -p .claude/context .claude/instructions .claude/templates
+# SBOM2CVE Auto-Setup Hook
+# This runs every time you enter the Flox environment
+
+echo "🔧 SBOM2CVE Environment Setup"
+echo ""
+
+# Create necessary directories
+mkdir -p logs data/kafka config logs .claude/context .claude/instructions .claude/templates
 
 # Create Flox-first instructions for Claude
 cat > .claude/instructions.md << "INSTRUCTIONS"
@@ -62,7 +67,32 @@ echo "Generated: $(date)" >> .claude/context/flox-state.md
 echo "" >> .claude/context/flox-state.md
 flox list >> .claude/context/flox-state.md
 
-echo "✅ Claude + Flox integration ready!"
+# Check if Kafka needs initialization
+if [ ! -f data/kafka/cluster.id ]; then
+    echo "⚠️  Kafka not yet initialized"
+    echo "   Run: ./scripts/kafka_init.sh (first time only)"
+else
+    echo "✅ Kafka initialized"
+fi
+
+echo ""
+echo "════════════════════════════════════════════════════════════════"
+echo "  SBOM2CVE - Nix/Flox Vulnerability Monitor"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "🚀 Quick Start:"
+echo "   ./scripts/demo_start.sh      # Start everything"
+echo "   ./scripts/demo_stop.sh       # Stop everything"
+echo ""
+echo "📖 Documentation:"
+echo "   README.md                    # Main documentation"
+echo "   FLOXIFICATION_PLAN.md        # Pure Flox architecture"
+echo ""
+echo "🔍 Useful Commands:"
+echo "   flox list                    # Show installed packages"
+echo "   tail -f logs/*.log           # Monitor logs"
+echo ""
+echo "════════════════════════════════════════════════════════════════"
 '''
 
 [vars]

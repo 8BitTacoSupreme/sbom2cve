@@ -106,41 +106,63 @@ This will:
 - Start Kafka
 - Create topics: `sboms`, `cves`, `alerts`
 
-## Quick Start
+## Quick Start (100% Flox - No Docker Required!)
 
-### 1. Start Infrastructure (Docker)
-
-```bash
-./scripts/start_infrastructure.sh
-```
-
-This starts Kafka, Schema Registry, and Flink using Docker Compose.
-
-### 2. Start All Services (Nix/Flox mode by default)
+### For Flox Users (Recommended)
 
 ```bash
-./scripts/start_all.sh
+# 1. Activate the Flox environment
+flox activate
+
+# 2. Start the demo (everything auto-configured!)
+./scripts/demo_start.sh
+
+# 3. Open the dashboard
+open http://localhost:5001
 ```
 
-This automatically starts:
+**That's it!** No Docker, no pip, no manual setup. See **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** for details.
+
+### What's Running
+
+- **Native Kafka** (via Flox, KRaft mode - no Zookeeper!)
 - **Nix SBOM Producer** - Scans your Flox environment every 10 seconds
 - **Nix CVE Producer** - Publishes Nix CVEs every 7 seconds
-- **PURL Matcher** - Matches packages against CVEs with 95% confidence
-- **Alert Consumer** - Displays vulnerability alerts
-- **Dashboard** - Real-time visualization at http://localhost:5001
+- **PURL Matcher** - 95% confidence matching with ecosystem isolation
+- **Alert Consumer** - Real-time vulnerability alerts
+- **Dashboard** - Web UI at http://localhost:5001
 
-### 3. View Results
+### View Results
 
-Open http://localhost:5001 to see:
+**Dashboard**: http://localhost:5001
 - Real-time message counts
 - Vulnerability severity distribution
-- Recent alerts and matches
+- Recent alerts
 
-Or view logs:
+**Logs**:
 ```bash
-tail -f logs/matcher.log          # See matching activity
-tail -f logs/alert_consumer.log   # See formatted alerts
+tail -f logs/matcher.log          # Matching activity
+tail -f logs/alert_consumer.log   # Formatted alerts
+tail -f logs/kafka.log            # Kafka broker
 ```
+
+**Stop the demo**:
+```bash
+./scripts/demo_stop.sh
+```
+
+---
+
+## Alternative: Docker-Based Setup (Legacy)
+
+If you prefer Docker:
+
+```bash
+./scripts/start_infrastructure.sh  # Start Docker containers
+./scripts/start_all.sh              # Start Python services
+```
+
+See **[SETUP.md](SETUP.md)** for details.
 
 ## Manual Operation (Optional)
 
@@ -313,8 +335,11 @@ The Nix SBOM producer automatically scans your Flox environment. To customize:
 
 ## Documentation
 
-- **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** - Complete technical documentation of Nix/Flox integration
+- **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** - ⭐ Start here! Complete Flox user guide
+- **[FLOXIFICATION_PLAN.md](FLOXIFICATION_PLAN.md)** - Architecture and design decisions
+- **[NIX_INTEGRATION.md](NIX_INTEGRATION.md)** - Technical documentation of Nix/Flox integration
 - **[RUNNING.md](RUNNING.md)** - Current system status and service details
+- **[SETUP.md](SETUP.md)** - Setup guide (including Docker legacy path)
 - **[VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)** - Testing and validation procedures
 - **[test_nix_integration.sh](test_nix_integration.sh)** - Automated test script
 
