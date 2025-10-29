@@ -107,7 +107,7 @@ open http://localhost:5001
 
 **That's it!** No Docker, no pip, no manual setup. See **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** for details.
 
-> **Note**: Once published to FloxHub, you'll be able to use `flox pull <org>/sbom2cve` instead of git clone.
+> **Note**: The Flox environment is published on FloxHub as `8BitTacoSupreme/sbom2cve`. Cloning from Git ensures you get both the code and the environment definition.
 
 ### What's Running
 

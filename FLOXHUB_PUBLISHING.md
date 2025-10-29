@@ -95,18 +95,16 @@ flox push <your-org>/sbom2cve
 # flox push yourusername/sbom2cve
 ```
 
-### 5. Test the Pull Workflow
+### 5. Test the Complete User Workflow
 
 On a different machine or directory:
 
 ```bash
-# Pull from FloxHub
-flox pull <your-org>/sbom2cve
-
-# Enter directory
+# Clone the repository (gets source code + .flox environment)
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
 cd sbom2cve
 
-# Activate (should auto-install all packages)
+# Activate (should auto-install all packages from the .flox directory)
 flox activate
 
 # Should see welcome message with Quick Start commands
@@ -115,23 +113,35 @@ flox activate
 ./scripts/demo_start.sh
 ```
 
+**Note**: The `.flox` directory in your Git repo contains the environment definition. When users clone and activate, Flox automatically uses this local environment. The FloxHub entry provides discoverability and a remote reference.
+
 ---
 
 ## What Gets Published
 
+**Important**: `flox push` only publishes the **environment definition** (manifest and lock file), NOT the source code.
+
 When you `flox push`, FloxHub stores:
+- ✅ `.flox/env/manifest.toml` - Package declarations
+- ✅ `.flox/env/manifest.lock` - Locked versions
 
-✅ **Included**:
-- `.flox/env/manifest.toml` - All package declarations
-- Source code (`src/`, `scripts/`, `config/`)
-- Documentation (`*.md` files)
-- Configuration files
+**Source code must be obtained via Git**:
+- Users clone from GitHub: `git clone https://github.com/8BitTacoSupreme/sbom2cve.git`
+- The `.flox` directory in the repo contains the environment definition
+- `flox activate` automatically uses the local `.flox` environment
 
-❌ **Excluded** (via .gitignore):
-- `data/kafka/` - Local Kafka data
-- `logs/*.log` - Log files
-- `venv/` - Old virtual environment (legacy)
-- `.flox/cache/`, `.flox/log/` - Flox runtime
+**This is the recommended workflow**:
+```bash
+# User workflow
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
+cd sbom2cve
+flox activate  # Uses the .flox environment from the repo
+```
+
+The FloxHub entry serves as:
+- 📚 Discoverability (users can find your project on FloxHub)
+- 📦 Version history of the environment
+- 🔄 Remote reference for environment updates
 
 ---
 
@@ -139,31 +149,36 @@ When you `flox push`, FloxHub stores:
 
 ### Update Documentation
 
-Once published, update these files to use the new FloxHub URL:
+Once published, add a note about FloxHub availability:
 
 #### README.md
 ```markdown
 ## Quick Start
 
 ```bash
-# Pull from FloxHub
-flox pull <your-org>/sbom2cve
+# Clone from GitHub
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
 cd sbom2cve
 
 # Activate and start
 flox activate
 ./scripts/demo_start.sh
 ```
+
+> **FloxHub**: The Flox environment is published as `8BitTacoSupreme/sbom2cve` on FloxHub for discoverability.
 ```
 
 #### FLOX_QUICKSTART.md
 ```markdown
-## 🎯 Get Started in 2 Commands
+## 🎯 Get Started in 3 Commands
 
 ```bash
-flox pull <your-org>/sbom2cve && cd sbom2cve
-flox activate && ./scripts/demo_start.sh
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git && cd sbom2cve
+flox activate
+./scripts/demo_start.sh
 ```
+
+> **Published on FloxHub**: Available as `8BitTacoSupreme/sbom2cve`
 ```
 
 ### Share the Environment

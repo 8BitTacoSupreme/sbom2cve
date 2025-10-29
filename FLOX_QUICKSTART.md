@@ -10,7 +10,7 @@ flox activate
 
 That's it! No Docker, no pip, no brew, no manual setup. Everything is managed by Flox.
 
-> **Future**: Once published to FloxHub, you can use `flox pull <org>/sbom2cve` instead of git clone.
+> **Published on FloxHub**: The Flox environment is available as `8BitTacoSupreme/sbom2cve` on FloxHub. Cloning from Git gets you both the code and the environment definition in one step.
 
 ---
 
