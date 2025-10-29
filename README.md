@@ -77,51 +77,37 @@ SBOMs are generated in the industry-standard SPDX 2.3 JSON format with:
 
 ## Prerequisites
 
-This project uses **Flox** for environment management. All dependencies are managed through Flox.
+**Only requirement**: [Flox](https://flox.dev) installed
 
-### Installed via Flox:
-- Apache Kafka (apacheKafka)
-- Apache Flink (flink)
-- Python 3.12 (python312)
-- OpenJDK (openjdk)
+That's it! Flox manages everything else:
+- Apache Kafka
+- Python 3.12 with all packages
+- All configuration and setup
 
-## Setup
-
-### 1. Install Python Dependencies
-
-Since this is a Flox-managed environment, install Python packages using pip within the environment:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-### 2. Start Kafka
-
-```bash
-./scripts/setup_kafka.sh
-```
-
-This will:
-- Start Zookeeper
-- Start Kafka
-- Create topics: `sboms`, `cves`, `alerts`
+No Docker, no pip, no manual installation needed!
 
 ## Quick Start (100% Flox - No Docker Required!)
 
 ### For Flox Users (Recommended)
 
 ```bash
-# 1. Activate the Flox environment
+# 1. Clone the repository
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
+cd sbom2cve
+
+# 2. Activate the Flox environment (auto-installs all dependencies)
 flox activate
 
-# 2. Start the demo (everything auto-configured!)
+# 3. Start the demo (everything auto-configured!)
 ./scripts/demo_start.sh
 
-# 3. Open the dashboard
+# 4. Open the dashboard
 open http://localhost:5001
 ```
 
 **That's it!** No Docker, no pip, no manual setup. See **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** for details.
+
+> **Note**: Once published to FloxHub, you'll be able to use `flox pull <org>/sbom2cve` instead of git clone.
 
 ### What's Running
 

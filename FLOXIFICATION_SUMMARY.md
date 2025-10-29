@@ -32,18 +32,33 @@ flox activate
 
 ## New User Experience
 
+### Current (via GitHub)
+
 ```bash
-# Pull from FloxHub (when published)
-flox pull <org>/sbom2cve
+# Clone the repository
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
 cd sbom2cve
 
-# Activate and see welcome message
+# Activate and see welcome message (auto-installs all dependencies)
 flox activate
 
 # Start everything
 ./scripts/demo_start.sh
 
-# Dashboard opens automatically
+# Open dashboard
+open http://localhost:5001
+```
+
+### Future (via FloxHub - when published)
+
+```bash
+# Pull from FloxHub
+flox pull <org>/sbom2cve
+cd sbom2cve
+
+# Activate and start
+flox activate
+./scripts/demo_start.sh
 open http://localhost:5001
 ```
 

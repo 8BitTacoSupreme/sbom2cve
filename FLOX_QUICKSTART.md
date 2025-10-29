@@ -1,13 +1,16 @@
 # Flox Quick Start Guide
 
-## 🎯 Get Started in 2 Commands
+## 🎯 Get Started in 3 Commands
 
 ```bash
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git && cd sbom2cve
 flox activate
 ./scripts/demo_start.sh
 ```
 
 That's it! No Docker, no pip, no brew, no manual setup. Everything is managed by Flox.
+
+> **Future**: Once published to FloxHub, you can use `flox pull <org>/sbom2cve` instead of git clone.
 
 ---
 
