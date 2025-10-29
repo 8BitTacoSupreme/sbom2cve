@@ -5,7 +5,7 @@ SBOM Producer - Generates SPDX JSON SBOMs and sends them to Kafka
 import json
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from kafka import KafkaProducer
 from typing import List, Dict
 import random
@@ -57,7 +57,7 @@ class SPDXSBOMGenerator:
             "name": f"SBOM for {application_name}",
             "documentNamespace": f"https://example.com/sboms/{uuid.uuid4()}",
             "creationInfo": {
-                "created": datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z'),
+                "created": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
                 "creators": ["Tool: sbom-generator-1.0"],
                 "licenseListVersion": "3.19"
             },

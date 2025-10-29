@@ -5,7 +5,7 @@ CVE Producer - Generates CVE records and sends them to Kafka
 import json
 import time
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from kafka import KafkaProducer
 from typing import Dict, List
 
@@ -141,7 +141,7 @@ class CVEGenerator:
         cve = random.choice(self.KNOWN_CVES).copy()
 
         # Add some dynamic fields
-        cve["retrieved_at"] = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
+        cve["retrieved_at"] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         cve["source"] = "NVD"
 
         return cve

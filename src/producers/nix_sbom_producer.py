@@ -15,7 +15,7 @@ false positives when matching against CVEs.
 import json
 import subprocess
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Optional
 from kafka import KafkaProducer
 import time
@@ -151,7 +151,7 @@ class NixSBOMProducer:
         Returns:
             SPDX 2.3 SBOM dictionary
         """
-        timestamp = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
+        timestamp = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
         # Create SPDX packages
         spdx_packages = []
