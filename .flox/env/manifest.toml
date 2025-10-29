@@ -96,7 +96,7 @@ echo "════════════════════════�
 '''
 
 [vars]
-KAFKA_HOME = "$FLOX_ENV/libexec/kafka"
+# Kafka configuration
 KAFKA_HEAP_OPTS = "-Xmx512M -Xms512M"
 
 [profile]

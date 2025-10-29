@@ -25,7 +25,7 @@ fi
 echo "🚀 Starting Kafka server..."
 
 # Start Kafka in background
-$KAFKA_HOME/bin/kafka-server-start.sh \
+kafka-server-start.sh \
     config/kafka/kraft-server.properties \
     > logs/kafka.log 2>&1 &
 
@@ -35,7 +35,7 @@ echo "📦 Kafka starting (PID: $KAFKA_PID)"
 # Wait for Kafka to be ready
 echo "⏳ Waiting for Kafka to be ready..."
 for i in {1..30}; do
-    if $KAFKA_HOME/bin/kafka-broker-api-versions.sh \
+    if kafka-broker-api-versions.sh \
         --bootstrap-server localhost:9092 &> /dev/null; then
         echo "✅ Kafka is ready!"
         break
@@ -50,15 +50,15 @@ done
 
 # Create topics
 echo "📝 Creating topics..."
-$KAFKA_HOME/bin/kafka-topics.sh --create --if-not-exists \
+kafka-topics.sh --create --if-not-exists \
     --topic sboms --bootstrap-server localhost:9092 \
     --partitions 3 --replication-factor 1
 
-$KAFKA_HOME/bin/kafka-topics.sh --create --if-not-exists \
+kafka-topics.sh --create --if-not-exists \
     --topic cves --bootstrap-server localhost:9092 \
     --partitions 3 --replication-factor 1
 
-$KAFKA_HOME/bin/kafka-topics.sh --create --if-not-exists \
+kafka-topics.sh --create --if-not-exists \
     --topic alerts --bootstrap-server localhost:9092 \
     --partitions 3 --replication-factor 1
 
@@ -67,7 +67,7 @@ echo "✅ Topics created"
 # List topics
 echo ""
 echo "📋 Available topics:"
-$KAFKA_HOME/bin/kafka-topics.sh --list --bootstrap-server localhost:9092 | grep -E "^(sboms|cves|alerts)$" | sed 's/^/   - /'
+kafka-topics.sh --list --bootstrap-server localhost:9092 | grep -E "^(sboms|cves|alerts)$" | sed 's/^/   - /'
 
 echo ""
 echo "✅ Kafka is running!"

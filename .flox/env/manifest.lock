@@ -12,14 +12,14 @@
       "flask": {
         "pkg-path": "python312Packages.flask"
       },
-      "flink": {
-        "pkg-path": "flink"
-      },
       "kafka-python": {
         "pkg-path": "python312Packages.kafka-python"
       },
       "openjdk": {
         "pkg-path": "openjdk"
+      },
+      "packageurl-python": {
+        "pkg-path": "python312Packages.packageurl-python"
       },
       "packaging": {
         "pkg-path": "python312Packages.packaging"
@@ -33,7 +33,7 @@
       "KAFKA_HOME": "$FLOX_ENV/libexec/kafka"
     },
     "hook": {
-      "on-activate": "#!/bin/bash\n# Initialize Claude context directory\nmkdir -p .claude/context .claude/instructions .claude/templates\n\n# Create Flox-first instructions for Claude\ncat > .claude/instructions.md << \"INSTRUCTIONS\"\n# CRITICAL: Flox Environment Management\n\nYou are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:\n\n## Dependency Rules:\n- NEVER use: brew, apt, npm install, pip install, cargo install, etc.\n- ALWAYS use: flox install <package>\n- All dependencies MUST be declared in .flox/env/manifest.toml\n\n## Flox Commands:\n- Add package: flox install <package>\n- Search packages: flox search <package>\n- Show environment: flox list\n\n## When Creating Projects:\n1. Define all deps in manifest.toml\n2. Use [profile] for PATH setup\n3. Use [hook] for initialization\n\nNEVER bypass Flox - it manages the ENTIRE environment.\nINSTRUCTIONS\n\n# Generate current environment state\necho \"# Current Flox Environment\" > .claude/context/flox-state.md\necho \"Generated: $(date)\" >> .claude/context/flox-state.md\necho \"\" >> .claude/context/flox-state.md\nflox list >> .claude/context/flox-state.md\n\necho \"✅ Claude + Flox integration ready!\"\n"
+      "on-activate": "#!/bin/bash\n# SBOM2CVE Auto-Setup Hook\n# This runs every time you enter the Flox environment\n\necho \"🔧 SBOM2CVE Environment Setup\"\necho \"\"\n\n# Create necessary directories\nmkdir -p logs data/kafka config logs .claude/context .claude/instructions .claude/templates\n\n# Create Flox-first instructions for Claude\ncat > .claude/instructions.md << \"INSTRUCTIONS\"\n# CRITICAL: Flox Environment Management\n\nYou are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:\n\n## Dependency Rules:\n- NEVER use: brew, apt, npm install, pip install, cargo install, etc.\n- ALWAYS use: flox install <package>\n- All dependencies MUST be declared in .flox/env/manifest.toml\n\n## Flox Commands:\n- Add package: flox install <package>\n- Search packages: flox search <package>\n- Show environment: flox list\n\n## When Creating Projects:\n1. Define all deps in manifest.toml\n2. Use [profile] for PATH setup\n3. Use [hook] for initialization\n\nNEVER bypass Flox - it manages the ENTIRE environment.\nINSTRUCTIONS\n\n# Generate current environment state\necho \"# Current Flox Environment\" > .claude/context/flox-state.md\necho \"Generated: $(date)\" >> .claude/context/flox-state.md\necho \"\" >> .claude/context/flox-state.md\nflox list >> .claude/context/flox-state.md\n\n# Check if Kafka needs initialization\nif [ ! -f data/kafka/cluster.id ]; then\n    echo \"⚠️  Kafka not yet initialized\"\n    echo \"   Run: ./scripts/kafka_init.sh (first time only)\"\nelse\n    echo \"✅ Kafka initialized\"\nfi\n\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"  SBOM2CVE - Nix/Flox Vulnerability Monitor\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"\"\necho \"🚀 Quick Start:\"\necho \"   ./scripts/demo_start.sh      # Start everything\"\necho \"   ./scripts/demo_stop.sh       # Stop everything\"\necho \"\"\necho \"📖 Documentation:\"\necho \"   README.md                    # Main documentation\"\necho \"   FLOXIFICATION_PLAN.md        # Pure Flox architecture\"\necho \"\"\necho \"🔍 Useful Commands:\"\necho \"   flox list                    # Show installed packages\"\necho \"   tail -f logs/*.log           # Monitor logs\"\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\n"
     },
     "profile": {
       "common": "export CLAUDE_CONTEXT_DIR=\"$FLOX_ENV_PROJECT/.claude\"\nalias claude='claude-code --project-dir \"$FLOX_ENV_PROJECT\"'\nexport PYTHONPATH=\"$FLOX_ENV_PROJECT:$PYTHONPATH\"\n"
@@ -394,122 +394,6 @@
       "priority": 5
     },
     {
-      "attr_path": "flink",
-      "broken": false,
-      "derivation": "/nix/store/pz3w9fxb8wmf9qq4nnrng55s0ckx04wi-flink-2.1.0.drv",
-      "description": "Distributed stream processing framework",
-      "install_id": "flink",
-      "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "name": "flink-2.1.0",
-      "pname": "flink",
-      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "rev_count": 876718,
-      "rev_date": "2025-10-12T16:01:26Z",
-      "scrape_date": "2025-10-14T03:17:44.163123Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "2.1.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/5dzwx1ghmxhkzff36vlvrl57bin4bzcd-flink-2.1.0"
-      },
-      "system": "aarch64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "flink",
-      "broken": false,
-      "derivation": "/nix/store/y5yk7zkbmd7y11fzcxhpimkg97fk8ava-flink-2.1.0.drv",
-      "description": "Distributed stream processing framework",
-      "install_id": "flink",
-      "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "name": "flink-2.1.0",
-      "pname": "flink",
-      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "rev_count": 876718,
-      "rev_date": "2025-10-12T16:01:26Z",
-      "scrape_date": "2025-10-14T03:47:21.416197Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "2.1.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/165404c05zib4qvq49ykk56zgnshkq2f-flink-2.1.0"
-      },
-      "system": "aarch64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "flink",
-      "broken": false,
-      "derivation": "/nix/store/gnb0vlld6v203klqsb08g0k7lb7ainbb-flink-2.1.0.drv",
-      "description": "Distributed stream processing framework",
-      "install_id": "flink",
-      "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "name": "flink-2.1.0",
-      "pname": "flink",
-      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "rev_count": 876718,
-      "rev_date": "2025-10-12T16:01:26Z",
-      "scrape_date": "2025-10-14T04:15:18.594403Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "2.1.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/8a9f3jp2s1x8pn2s0w8s9x3mxvyqxn34-flink-2.1.0"
-      },
-      "system": "x86_64-darwin",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
-      "attr_path": "flink",
-      "broken": false,
-      "derivation": "/nix/store/8w0kq5fq2aw4jawfqasqbnpsvgyh62w4-flink-2.1.0.drv",
-      "description": "Distributed stream processing framework",
-      "install_id": "flink",
-      "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "name": "flink-2.1.0",
-      "pname": "flink",
-      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
-      "rev_count": 876718,
-      "rev_date": "2025-10-12T16:01:26Z",
-      "scrape_date": "2025-10-14T04:46:25.105120Z",
-      "stabilities": [
-        "unstable"
-      ],
-      "unfree": false,
-      "version": "2.1.0",
-      "outputs_to_install": [
-        "out"
-      ],
-      "outputs": {
-        "out": "/nix/store/9s6bzhh9bbjwivxf4ssx145q49g95aks-flink-2.1.0"
-      },
-      "system": "x86_64-linux",
-      "group": "toplevel",
-      "priority": 5
-    },
-    {
       "attr_path": "python312Packages.kafka-python",
       "broken": false,
       "derivation": "/nix/store/2nnv7dm03y2rxc3dq1gwmjfxlf2dads1-python3.12-kafka-python-ng-2.2.3.drv",
@@ -742,6 +626,126 @@
       "outputs": {
         "debug": "/nix/store/8n7g1dv9cy7xgfwlizhg2cfwj2f4avd8-openjdk-21.0.8+9-debug",
         "out": "/nix/store/0x556ql275jkl46k6lklpyvwn5c4p244-openjdk-21.0.8+9"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packageurl-python",
+      "broken": false,
+      "derivation": "/nix/store/izdmiww07h3aw6q3yn2f99q4jl24gmcy-python3.12-packageurl-python-0.17.5.drv",
+      "description": "Python parser and builder for package URLs",
+      "install_id": "packageurl-python",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packageurl-python-0.17.5",
+      "pname": "packageurl-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:34.408519Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.17.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/xi4shlvqiwip2kb2ih2a1nc2hqfz13id-python3.12-packageurl-python-0.17.5-dist",
+        "out": "/nix/store/w27dmh3d95byra8jh9imvhjr8w74i94n-python3.12-packageurl-python-0.17.5"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packageurl-python",
+      "broken": false,
+      "derivation": "/nix/store/1lxp2kk2dz3xmk90yz4cbln6lkdfps9i-python3.12-packageurl-python-0.17.5.drv",
+      "description": "Python parser and builder for package URLs",
+      "install_id": "packageurl-python",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packageurl-python-0.17.5",
+      "pname": "packageurl-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:35.771137Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.17.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/7iczvx8n3kvkp6hwwldh5519r51k3kmd-python3.12-packageurl-python-0.17.5-dist",
+        "out": "/nix/store/9hq91q802h8sh8cx5abwndpm3h2bkvlm-python3.12-packageurl-python-0.17.5"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packageurl-python",
+      "broken": false,
+      "derivation": "/nix/store/wq3sj8wyvfm0qzhlgd7bfnhgdv2daizy-python3.12-packageurl-python-0.17.5.drv",
+      "description": "Python parser and builder for package URLs",
+      "install_id": "packageurl-python",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packageurl-python-0.17.5",
+      "pname": "packageurl-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:05.561426Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.17.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/i1lq6rsr3gxg0g9kks8izwzpb4622j3r-python3.12-packageurl-python-0.17.5-dist",
+        "out": "/nix/store/qyhqx7pcnwvjkxh6j270212v1kqi3jbx-python3.12-packageurl-python-0.17.5"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.packageurl-python",
+      "broken": false,
+      "derivation": "/nix/store/3f3hjli4p3ga7c4qlpf6kh252qmx4gpw-python3.12-packageurl-python-0.17.5.drv",
+      "description": "Python parser and builder for package URLs",
+      "install_id": "packageurl-python",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-packageurl-python-0.17.5",
+      "pname": "packageurl-python",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:42.637190Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.17.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/frk8qc9xi553jg961s8m8jf3dhswlndz-python3.12-packageurl-python-0.17.5-dist",
+        "out": "/nix/store/60f9iwqaprn7ps3yfs14ij925g704ywk-python3.12-packageurl-python-0.17.5"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

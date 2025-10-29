@@ -21,14 +21,14 @@ if [ -f data/kafka/cluster.id ]; then
     echo "📋 Using existing cluster ID: $CLUSTER_ID"
 else
     # Generate a new cluster ID
-    CLUSTER_ID=$($KAFKA_HOME/bin/kafka-storage.sh random-uuid)
+    CLUSTER_ID=$(kafka-storage.sh random-uuid)
     echo "$CLUSTER_ID" > data/kafka/cluster.id
     echo "✨ Generated new cluster ID: $CLUSTER_ID"
 fi
 
 # Format the log directory
 echo "📝 Formatting Kafka log directory..."
-$KAFKA_HOME/bin/kafka-storage.sh format \
+kafka-storage.sh format \
     -t "$CLUSTER_ID" \
     -c config/kafka/kraft-server.properties
 
