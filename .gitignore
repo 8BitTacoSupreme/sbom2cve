@@ -54,3 +54,4 @@ test_output/
 # Unrelated files
 q4-campaigns.csv
 
+*.log
