@@ -91,11 +91,11 @@ No Docker, no pip, no manual installation needed!
 ### For Flox Users (Recommended)
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/8BitTacoSupreme/sbom2cve.git
+# 1. Pull the environment from FloxHub
+flox pull 8BitTacoSupreme/sbom2cve
 cd sbom2cve
 
-# 2. Activate the Flox environment (auto-installs all dependencies)
+# 2. Activate (auto-installs dependencies + clones source code)
 flox activate
 
 # 3. Start the demo (everything auto-configured!)
@@ -105,9 +105,18 @@ flox activate
 open http://localhost:5001
 ```
 
-**That's it!** No Docker, no pip, no manual setup. See **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** for details.
+**That's it!** No Docker, no pip, no git clone needed. See **[FLOX_QUICKSTART.md](FLOX_QUICKSTART.md)** for details.
 
-> **Note**: The Flox environment is published on FloxHub as `8BitTacoSupreme/sbom2cve`. Cloning from Git ensures you get both the code and the environment definition.
+> **How it works**: `flox activate` automatically clones the source code from GitHub if not present, installs all dependencies via Flox, and sets up the environment. Everything is managed declaratively!
+
+### Alternative: Git Clone Method
+
+```bash
+git clone https://github.com/8BitTacoSupreme/sbom2cve.git
+cd sbom2cve
+flox activate
+./scripts/demo_start.sh
+```
 
 ### What's Running
 

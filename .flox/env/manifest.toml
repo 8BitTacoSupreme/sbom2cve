@@ -16,6 +16,7 @@ version = 1
 ## -------------------------------------------------------------------
 [install]
 claude-code.pkg-path = "claude-code"
+git.pkg-path = "git"
 apacheKafka.pkg-path = "apacheKafka"
 python312.pkg-path = "python312"
 openjdk.pkg-path = "openjdk"
@@ -33,6 +34,28 @@ on-activate = '''
 
 echo "🔧 SBOM2CVE Environment Setup"
 echo ""
+
+# Check if source code is present
+if [ ! -f "scripts/demo_start.sh" ]; then
+    echo "📦 Source code not found. Cloning from GitHub..."
+    echo ""
+
+    # Clone the repository into a temp directory
+    TEMP_DIR=$(mktemp -d)
+    git clone https://github.com/8BitTacoSupreme/sbom2cve.git "$TEMP_DIR" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        # Move contents to current directory (excluding .flox to preserve environment)
+        rsync -av --exclude='.flox' "$TEMP_DIR/" . 2>/dev/null || \
+        (cd "$TEMP_DIR" && tar -cf - --exclude='.flox' .) | tar -xf -
+        rm -rf "$TEMP_DIR"
+        echo "✅ Source code cloned successfully"
+    else
+        echo "⚠️  Failed to clone repository. Please run manually:"
+        echo "   git clone https://github.com/8BitTacoSupreme/sbom2cve.git"
+    fi
+    echo ""
+fi
 
 # Create necessary directories
 mkdir -p logs data/kafka config logs .claude/context .claude/instructions .claude/templates
