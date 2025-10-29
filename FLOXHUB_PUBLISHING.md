@@ -53,14 +53,11 @@ open http://localhost:5001
 Remove any local data/state:
 
 ```bash
+# Clean everything
+./scripts/demo_clean.sh
+
 # Exit Flox environment
 exit
-
-# Remove local Kafka data
-rm -rf data/kafka
-
-# Remove logs
-rm -f logs/*.log
 
 # Verify gitignore is working
 git status  # Should not show data/kafka or logs/*.log
@@ -325,8 +322,7 @@ All Python packages should be listed.
 
 ```bash
 # 1. Clean and test locally
-./scripts/demo_stop.sh
-rm -rf data/kafka logs/*.log
+./scripts/demo_clean.sh
 exit
 
 # 2. Fresh activation test

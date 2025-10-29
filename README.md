@@ -137,6 +137,12 @@ tail -f logs/kafka.log            # Kafka broker
 ./scripts/demo_stop.sh
 ```
 
+**Clean and restart from scratch**:
+```bash
+./scripts/demo_clean.sh  # Removes all logs and Kafka data
+./scripts/demo_start.sh  # Fresh start
+```
+
 ---
 
 ## Alternative: Docker-Based Setup (Legacy)
@@ -257,6 +263,19 @@ This system uses PURLs to ensure:
 
 ## Stopping the Application
 
+### Flox Mode (Recommended)
+
+```bash
+# Stop all services
+./scripts/demo_stop.sh
+
+# Clean everything and start fresh
+./scripts/demo_clean.sh
+./scripts/demo_start.sh
+```
+
+### Docker Mode (Legacy)
+
 ```bash
 # Stop all Python services
 pkill -f 'python3 src/'
@@ -287,8 +306,14 @@ sbom2cve/
 │   └── dashboard/
 │       └── dashboard.py            # Flask web dashboard
 ├── scripts/
-│   ├── start_infrastructure.sh     # Start Docker services
-│   └── start_all.sh                # Start all Python services (Nix mode)
+│   ├── demo_start.sh               # ⭐ Start everything (Flox mode)
+│   ├── demo_stop.sh                # Stop all services
+│   ├── demo_clean.sh               # Clean logs and Kafka data
+│   ├── kafka_init.sh               # Initialize Kafka (first time)
+│   ├── kafka_start.sh              # Start Kafka broker
+│   ├── kafka_stop.sh               # Stop Kafka broker
+│   ├── start_all.sh                # Start Python services (Nix mode)
+│   └── start_infrastructure.sh     # Start Docker services (legacy)
 ├── logs/                           # Application logs
 ├── requirements.txt                # Python dependencies
 ├── NIX_INTEGRATION.md              # Nix/Flox documentation

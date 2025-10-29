@@ -74,6 +74,13 @@ open http://localhost:5001
 ./scripts/demo_stop.sh
 ```
 
+### Clean and Restart from Scratch
+
+```bash
+./scripts/demo_clean.sh  # Removes all logs and Kafka data
+./scripts/demo_start.sh  # Fresh start
+```
+
 ---
 
 ## 🏗️ Architecture (Pure Flox Stack)
@@ -200,7 +207,23 @@ If you want more control, run components individually:
 ./scripts/start_all.sh
 ```
 
-### Stop Individual Components
+### Stop Everything
+
+```bash
+./scripts/demo_stop.sh
+```
+
+### Clean and Restart
+
+```bash
+# Remove all logs and Kafka data
+./scripts/demo_clean.sh
+
+# Start fresh
+./scripts/demo_start.sh
+```
+
+### Stop Individual Components (Advanced)
 
 ```bash
 # Stop Python services
@@ -222,11 +245,12 @@ sbom2cve/
 │   └── kafka/
 │       └── kraft-server.properties  # Kafka configuration
 ├── scripts/
+│   ├── demo_start.sh           # ⭐ Start everything
+│   ├── demo_stop.sh            # Stop all services
+│   ├── demo_clean.sh           # Clean logs and Kafka data
 │   ├── kafka_init.sh           # Initialize Kafka (first time)
 │   ├── kafka_start.sh          # Start Kafka
 │   ├── kafka_stop.sh           # Stop Kafka
-│   ├── demo_start.sh           # ⭐ Start everything
-│   ├── demo_stop.sh            # Stop everything
 │   └── start_all.sh            # Start Python services
 ├── src/
 │   ├── producers/
@@ -257,10 +281,9 @@ pgrep -f "kafka.Kafka"
 # View logs
 tail -50 logs/kafka.log
 
-# Re-initialize (will wipe data)
-rm -rf data/kafka
-./scripts/kafka_init.sh
-./scripts/kafka_start.sh
+# Clean and restart
+./scripts/demo_clean.sh
+./scripts/demo_start.sh
 ```
 
 ### Python import errors
@@ -295,12 +318,12 @@ kill -9 <PID>
 # Check if services are running
 pgrep -f "python3 src/"
 
-# Restart services
-./scripts/demo_stop.sh
+# Clean and restart
+./scripts/demo_clean.sh
 ./scripts/demo_start.sh
 
 # Verify Kafka topics have data
-$KAFKA_HOME/bin/kafka-console-consumer.sh \
+kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 \
   --topic sboms --from-beginning --max-messages 1
 ```
