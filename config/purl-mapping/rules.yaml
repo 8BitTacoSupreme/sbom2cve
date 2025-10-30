@@ -1,0 +1,190 @@
+# PURL Mapping Rules
+# Maps upstream ecosystem PURLs (PyPI, npm, Go, Maven, Rust) to Nix PURLs
+# Version: 1.0
+
+version: "1.0"
+
+rules:
+  # ========================================
+  # PyPI → Nix Mappings
+  # ========================================
+  - source_type: "pypi"
+    target_type: "nix"
+    pattern: "pkg:pypi/{package}"
+    description: "Map PyPI packages to Nix python*Packages"
+    target_patterns:
+      - "pkg:nix/nixpkgs/python312Packages.{package}"
+      - "pkg:nix/nixpkgs/python311Packages.{package}"
+      - "pkg:nix/nixpkgs/python310Packages.{package}"
+      - "pkg:nix/nixpkgs/python3Packages.{package}"  # Generic fallback
+    confidence: 0.95
+    notes: "Most PyPI packages follow pythonXXXPackages.{name} convention"
+
+  # ========================================
+  # npm → Nix Mappings
+  # ========================================
+  - source_type: "npm"
+    target_type: "nix"
+    pattern: "pkg:npm/{package}"
+    description: "Map npm packages to Nix nodePackages"
+    target_patterns:
+      - "pkg:nix/nixpkgs/nodePackages.{package}"
+      - "pkg:nix/nixpkgs/nodePackages_{underscore}"  # Some use underscore instead of hyphen
+    transformation_rules:
+      - type: "underscore"
+        description: "Replace hyphens with underscores for some packages"
+        pattern: "-"
+        replacement: "_"
+    confidence: 0.90
+    notes: "Some npm packages use underscore naming in nixpkgs"
+
+  # ========================================
+  # Go → Nix Mappings (Complex)
+  # ========================================
+  - source_type: "golang"
+    target_type: "nix"
+    pattern: "pkg:golang/{module}"
+    description: "Map Go modules to Nix packages (complex derivation)"
+    derivation_rules:
+      # golang.org/x/* → go-*
+      - match_prefix: "golang.org/x/"
+        strip_prefix: "golang.org/x/"
+        add_prefix: "go-"
+        example: "golang.org/x/crypto → go-crypto"
+
+      # github.com/user/repo → repo
+      - match_prefix: "github.com/"
+        strip_prefix: "github.com/.+/"
+        example: "github.com/spf13/cobra → cobra"
+
+      # Direct mapping for common packages
+      - match_exact: true
+    target_patterns:
+      - "pkg:nix/nixpkgs/{derived_name}"
+    confidence: 0.80
+    notes: "Go module names are transformed to nixpkgs package names. May require override list."
+
+  # ========================================
+  # Maven → Nix Mappings
+  # ========================================
+  - source_type: "maven"
+    target_type: "nix"
+    pattern: "pkg:maven/{group}/{artifact}"
+    description: "Map Maven artifacts to Nix Java packages"
+    derivation_rules:
+      - type: "artifact_only"
+        description: "Use only artifact name, ignore group"
+        extract: "{artifact}"
+    target_patterns:
+      - "pkg:nix/nixpkgs/{artifact}"
+      - "pkg:nix/nixpkgs/javaPackages.{artifact}"
+    confidence: 0.75
+    notes: "Maven group ID is typically ignored in nixpkgs naming"
+
+  # ========================================
+  # Rust/Cargo → Nix Mappings
+  # ========================================
+  - source_type: "cargo"
+    target_type: "nix"
+    pattern: "pkg:cargo/{crate}"
+    description: "Map Rust crates to Nix packages"
+    target_patterns:
+      - "pkg:nix/nixpkgs/{crate}"
+      - "pkg:nix/nixpkgs/rustPlatform.{crate}"
+    confidence: 0.90
+    notes: "Most Rust crates have direct nixpkgs equivalents"
+
+# ========================================
+# Override List (Edge Cases)
+# ========================================
+overrides:
+  # Python edge cases
+  "pkg:pypi/pillow":
+    - "pkg:nix/nixpkgs/python3Packages.pillow"
+  "pkg:pypi/pyyaml":
+    - "pkg:nix/nixpkgs/python3Packages.pyyaml"
+  "pkg:pypi/msgpack":
+    - "pkg:nix/nixpkgs/python3Packages.msgpack"
+
+  # npm edge cases
+  "pkg:npm/@types/node":
+    - "pkg:nix/nixpkgs/nodePackages.node"
+  "pkg:npm/typescript":
+    - "pkg:nix/nixpkgs/nodePackages.typescript"
+
+  # Go edge cases
+  "pkg:golang/github.com/spf13/cobra":
+    - "pkg:nix/nixpkgs/cobra"
+  "pkg:golang/golang.org/x/crypto":
+    - "pkg:nix/nixpkgs/go-crypto"
+  "pkg:golang/github.com/prometheus/client_golang":
+    - "pkg:nix/nixpkgs/prometheus-client-go"
+
+  # Maven edge cases
+  "pkg:maven/org.apache.commons/commons-lang3":
+    - "pkg:nix/nixpkgs/commons-lang3"
+  "pkg:maven/com.fasterxml.jackson.core/jackson-databind":
+    - "pkg:nix/nixpkgs/jackson-databind"
+
+  # Rust edge cases
+  "pkg:cargo/tokio":
+    - "pkg:nix/nixpkgs/tokio"
+  "pkg:cargo/serde":
+    - "pkg:nix/nixpkgs/serde"
+
+# ========================================
+# Canonicalization Rules (Nix → Nix)
+# ========================================
+canonicalization:
+  description: "Normalize Nix PURL variants to canonical form"
+  rules:
+    # Normalize python package references
+    - pattern: "pkg:nix/nixpkgs/python(\\d+)Packages\\.(.+)"
+      canonical: "pkg:nix/nixpkgs/python3Packages.{package}"
+      note: "Standardize to python3Packages for matching"
+
+    # Normalize version qualifiers
+    - strip_qualifiers: ["arch", "distro"]
+      note: "Remove architecture and distro qualifiers for matching"
+
+# ========================================
+# Testing Fixtures
+# ========================================
+test_cases:
+  - input: "pkg:pypi/flask@2.0.0"
+    expected_outputs:
+      - "pkg:nix/nixpkgs/python312Packages.flask"
+      - "pkg:nix/nixpkgs/python311Packages.flask"
+      - "pkg:nix/nixpkgs/python310Packages.flask"
+      - "pkg:nix/nixpkgs/python3Packages.flask"
+
+  - input: "pkg:npm/express@4.18.0"
+    expected_outputs:
+      - "pkg:nix/nixpkgs/nodePackages.express"
+
+  - input: "pkg:golang/golang.org/x/crypto@v0.0.0"
+    expected_outputs:
+      - "pkg:nix/nixpkgs/go-crypto"
+
+  - input: "pkg:maven/org.apache.commons/commons-lang3@3.12.0"
+    expected_outputs:
+      - "pkg:nix/nixpkgs/commons-lang3"
+
+  - input: "pkg:cargo/tokio@1.28.0"
+    expected_outputs:
+      - "pkg:nix/nixpkgs/tokio"
+
+# ========================================
+# Metadata
+# ========================================
+metadata:
+  created: "2025-10-30"
+  updated: "2025-10-30"
+  version: "1.0"
+  maintainer: "SBOM2CVE Team"
+  notes: |
+    This mapping file is loaded into Kafka topic 'purl-mapping-rules'
+    and broadcast to all Flink PURL Mapper tasks.
+
+    Updates to this file can be applied without redeploying Flink jobs
+    by publishing updated rules to the topic.

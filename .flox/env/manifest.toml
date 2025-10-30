@@ -31,6 +31,7 @@ nodejs.pkg-path = "nodejs"
 nginx.pkg-path = "nginx"
 requests.pkg-path = "python312Packages.requests"
 urllib3.pkg-path = "python312Packages.urllib3"
+pyyaml.pkg-path = "python312Packages.pyyaml"
 
 [hook]
 on-activate = '''

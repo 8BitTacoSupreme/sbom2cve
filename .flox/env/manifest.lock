@@ -9,14 +9,29 @@
       "claude-code": {
         "pkg-path": "claude-code"
       },
+      "curl": {
+        "pkg-path": "curl"
+      },
       "flask": {
         "pkg-path": "python312Packages.flask"
+      },
+      "git": {
+        "pkg-path": "git"
       },
       "kafka-python": {
         "pkg-path": "python312Packages.kafka-python"
       },
+      "nginx": {
+        "pkg-path": "nginx"
+      },
+      "nodejs": {
+        "pkg-path": "nodejs"
+      },
       "openjdk": {
         "pkg-path": "openjdk"
+      },
+      "openssl": {
+        "pkg-path": "openssl"
       },
       "packageurl-python": {
         "pkg-path": "python312Packages.packageurl-python"
@@ -26,13 +41,22 @@
       },
       "python312": {
         "pkg-path": "python312"
+      },
+      "pyyaml": {
+        "pkg-path": "python312Packages.pyyaml"
+      },
+      "requests": {
+        "pkg-path": "python312Packages.requests"
+      },
+      "urllib3": {
+        "pkg-path": "python312Packages.urllib3"
       }
     },
     "vars": {
       "KAFKA_HEAP_OPTS": "-Xmx512M -Xms512M"
     },
     "hook": {
-      "on-activate": "#!/bin/bash\n# SBOM2CVE Auto-Setup Hook\n# This runs every time you enter the Flox environment\n\necho \"🔧 SBOM2CVE Environment Setup\"\necho \"\"\n\n# Create necessary directories\nmkdir -p logs data/kafka config logs .claude/context .claude/instructions .claude/templates\n\n# Create Flox-first instructions for Claude\ncat > .claude/instructions.md << \"INSTRUCTIONS\"\n# CRITICAL: Flox Environment Management\n\nYou are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:\n\n## Dependency Rules:\n- NEVER use: brew, apt, npm install, pip install, cargo install, etc.\n- ALWAYS use: flox install <package>\n- All dependencies MUST be declared in .flox/env/manifest.toml\n\n## Flox Commands:\n- Add package: flox install <package>\n- Search packages: flox search <package>\n- Show environment: flox list\n\n## When Creating Projects:\n1. Define all deps in manifest.toml\n2. Use [profile] for PATH setup\n3. Use [hook] for initialization\n\nNEVER bypass Flox - it manages the ENTIRE environment.\nINSTRUCTIONS\n\n# Generate current environment state\necho \"# Current Flox Environment\" > .claude/context/flox-state.md\necho \"Generated: $(date)\" >> .claude/context/flox-state.md\necho \"\" >> .claude/context/flox-state.md\nflox list >> .claude/context/flox-state.md\n\n# Check if Kafka needs initialization\nif [ ! -f data/kafka/cluster.id ]; then\n    echo \"⚠️  Kafka not yet initialized\"\n    echo \"   Run: ./scripts/kafka_init.sh (first time only)\"\nelse\n    echo \"✅ Kafka initialized\"\nfi\n\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"  SBOM2CVE - Nix/Flox Vulnerability Monitor\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"\"\necho \"🚀 Quick Start:\"\necho \"   ./scripts/demo_start.sh      # Start everything\"\necho \"   ./scripts/demo_stop.sh       # Stop everything\"\necho \"\"\necho \"📖 Documentation:\"\necho \"   README.md                    # Main documentation\"\necho \"   FLOXIFICATION_PLAN.md        # Pure Flox architecture\"\necho \"\"\necho \"🔍 Useful Commands:\"\necho \"   flox list                    # Show installed packages\"\necho \"   tail -f logs/*.log           # Monitor logs\"\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\n"
+      "on-activate": "#!/bin/bash\n# SBOM2CVE Auto-Setup Hook\n# This runs every time you enter the Flox environment\n\necho \"🔧 SBOM2CVE Environment Setup\"\necho \"\"\n\n# Check if source code is present\nif [ ! -f \"scripts/demo_start.sh\" ]; then\n    echo \"📦 Source code not found. Cloning from GitHub...\"\n    echo \"\"\n\n    # Clone the repository into a temp directory\n    TEMP_DIR=$(mktemp -d)\n    git clone https://github.com/8BitTacoSupreme/sbom2cve.git \"$TEMP_DIR\" 2>/dev/null\n\n    if [ $? -eq 0 ]; then\n        # Move contents to current directory (excluding .flox to preserve environment)\n        rsync -av --exclude='.flox' \"$TEMP_DIR/\" . 2>/dev/null || \\\n        (cd \"$TEMP_DIR\" && tar -cf - --exclude='.flox' .) | tar -xf -\n        rm -rf \"$TEMP_DIR\"\n        echo \"✅ Source code cloned successfully\"\n    else\n        echo \"⚠️  Failed to clone repository. Please run manually:\"\n        echo \"   git clone https://github.com/8BitTacoSupreme/sbom2cve.git\"\n    fi\n    echo \"\"\nfi\n\n# Create necessary directories\nmkdir -p logs data/kafka config logs .claude/context .claude/instructions .claude/templates\n\n# Create Flox-first instructions for Claude\ncat > .claude/instructions.md << \"INSTRUCTIONS\"\n# CRITICAL: Flox Environment Management\n\nYou are working in a Flox-managed environment. ALWAYS use Flox for ALL dependency management:\n\n## Dependency Rules:\n- NEVER use: brew, apt, npm install, pip install, cargo install, etc.\n- ALWAYS use: flox install <package>\n- All dependencies MUST be declared in .flox/env/manifest.toml\n\n## Flox Commands:\n- Add package: flox install <package>\n- Search packages: flox search <package>\n- Show environment: flox list\n\n## When Creating Projects:\n1. Define all deps in manifest.toml\n2. Use [profile] for PATH setup\n3. Use [hook] for initialization\n\nNEVER bypass Flox - it manages the ENTIRE environment.\nINSTRUCTIONS\n\n# Generate current environment state\necho \"# Current Flox Environment\" > .claude/context/flox-state.md\necho \"Generated: $(date)\" >> .claude/context/flox-state.md\necho \"\" >> .claude/context/flox-state.md\nflox list >> .claude/context/flox-state.md\n\n# Check if Kafka needs initialization\nif [ ! -f data/kafka/cluster.id ]; then\n    echo \"⚠️  Kafka not yet initialized\"\n    echo \"   Run: ./scripts/kafka_init.sh (first time only)\"\nelse\n    echo \"✅ Kafka initialized\"\nfi\n\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"  SBOM2CVE - Nix/Flox Vulnerability Monitor\"\necho \"════════════════════════════════════════════════════════════════\"\necho \"\"\necho \"🚀 Quick Start:\"\necho \"   ./scripts/demo_start.sh      # Start everything\"\necho \"   ./scripts/demo_stop.sh       # Stop everything\"\necho \"\"\necho \"📖 Documentation:\"\necho \"   README.md                    # Main documentation\"\necho \"   FLOXIFICATION_PLAN.md        # Pure Flox architecture\"\necho \"\"\necho \"🔍 Useful Commands:\"\necho \"   flox list                    # Show installed packages\"\necho \"   tail -f logs/*.log           # Monitor logs\"\necho \"\"\necho \"════════════════════════════════════════════════════════════════\"\n"
     },
     "profile": {
       "common": "export CLAUDE_CONTEXT_DIR=\"$FLOX_ENV_PROJECT/.claude\"\nalias claude='claude-code --project-dir \"$FLOX_ENV_PROJECT\"'\nexport PYTHONPATH=\"$FLOX_ENV_PROJECT:$PYTHONPATH\"\n"
@@ -273,6 +297,144 @@
       "priority": 5
     },
     {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/zraalmj57f303ap3g4x0j79g31rpsah3-curl-8.16.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "curl-8.16.0",
+      "pname": "curl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:17:43.741242Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.16.0",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/9ypm33ips48ajx8k5vylsf7s07zyiyd4-curl-8.16.0-bin",
+        "dev": "/nix/store/nzd14s06p5if7dnyn8y2hzqzkamzwm55-curl-8.16.0-dev",
+        "devdoc": "/nix/store/syv740hs672c330n113hyf3xj0h5ack8-curl-8.16.0-devdoc",
+        "man": "/nix/store/z3qng5iylqqz9ckwpypyybyaq5ng982p-curl-8.16.0-man",
+        "out": "/nix/store/6029v9dj2x3c34jshpa2qq56nyw1nmmx-curl-8.16.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/i32chrx87v4c43g1g5y3ysj72d29jkcw-curl-8.16.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "curl-8.16.0",
+      "pname": "curl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:20.766180Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.16.0",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/0gmdkrx09gwjzy9skah4v6makk136ypy-curl-8.16.0-bin",
+        "debug": "/nix/store/1mr41aafnfmvkcaw3gjdyrhhkifvsi0y-curl-8.16.0-debug",
+        "dev": "/nix/store/mym64df3wqjixarz9mn7mq5g1y3g7zqp-curl-8.16.0-dev",
+        "devdoc": "/nix/store/1mifapqq8441n9lpkpaphx4qdh49s9z1-curl-8.16.0-devdoc",
+        "man": "/nix/store/pmim4jif0h809mdp66il8w83lazxrpzq-curl-8.16.0-man",
+        "out": "/nix/store/xx3r5hwmblyka6ispzzjc9l8lpwjkjmj-curl-8.16.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/zy878rw1zi7hdlgrx7klnhmdpylwgbrx-curl-8.16.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "curl-8.16.0",
+      "pname": "curl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:18.179584Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.16.0",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/6bvdl2ri85m0hg7lcw9flxb1d7g6qjq5-curl-8.16.0-bin",
+        "dev": "/nix/store/b3vs7wi8v02cl9gqswagaps0qzv7x2cg-curl-8.16.0-dev",
+        "devdoc": "/nix/store/fz8gc405gjxhb8jh9f2p55vjfrhj3q6m-curl-8.16.0-devdoc",
+        "man": "/nix/store/n5clr4yj7642v1ciq4xwxami36yf852i-curl-8.16.0-man",
+        "out": "/nix/store/vhrp1hpqchp1wrkmwpmz4850nw922ngy-curl-8.16.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "curl",
+      "broken": false,
+      "derivation": "/nix/store/43flwfxi1i7q29sqwm6c1jgb4mzhik5w-curl-8.16.0.drv",
+      "description": "Command line tool for transferring files with URL syntax",
+      "install_id": "curl",
+      "license": "curl",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "curl-8.16.0",
+      "pname": "curl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:46:24.402747Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "8.16.0",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/jxi6bwbmxyzhxi9zm9dzlihca6iv358r-curl-8.16.0-bin",
+        "debug": "/nix/store/g8lp13yllkmbs8261q5b2a8ziq1acfz1-curl-8.16.0-debug",
+        "dev": "/nix/store/360cnyb9arqcww2jzb7axkinwfxak6si-curl-8.16.0-dev",
+        "devdoc": "/nix/store/hwq66543z5czh69lf6xxyfk2agl3g5sz-curl-8.16.0-devdoc",
+        "man": "/nix/store/0ba8dwwbddc1b7h7yrlnni6l0spdrxkh-curl-8.16.0-man",
+        "out": "/nix/store/y8n3yqamx85486qd3awiv91s55abkymc-curl-8.16.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "python312Packages.flask",
       "broken": false,
       "derivation": "/nix/store/680gc3har8c4gw7cmgfnaswf9psi0n5w-python3.12-flask-3.1.2.drv",
@@ -387,6 +549,128 @@
       "outputs": {
         "dist": "/nix/store/2mvx9sxicmyyr0h00acvq5nrcb2wy3b9-python3.12-flask-3.1.2-dist",
         "out": "/nix/store/9icbiqxb92pcwfxa7cfi10dvm940kmk9-python3.12-flask-3.1.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "git",
+      "broken": false,
+      "derivation": "/nix/store/113j7h886mmg1fv58ck36kk1az0frkxm-git-2.51.0.drv",
+      "description": "Distributed version control system",
+      "install_id": "git",
+      "license": "GPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "git-2.51.0",
+      "pname": "git",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:17:44.339456Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/wmbsv0kbk7qcbq3d7j9ks0cq05729sgc-git-2.51.0-doc",
+        "out": "/nix/store/pm302wxb0pkwi006sz9dviw30mkz5y00-git-2.51.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "git",
+      "broken": false,
+      "derivation": "/nix/store/82mdrgy5jdmvbc2rcl8aw7xw0harfzxs-git-2.51.0.drv",
+      "description": "Distributed version control system",
+      "install_id": "git",
+      "license": "GPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "git-2.51.0",
+      "pname": "git",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:21.710138Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/23rv1yi353k64ihdkby7nvb4q5zf4nr6-git-2.51.0-debug",
+        "doc": "/nix/store/prqym8j8s50gbq85y1f0wfiaylrfqjf9-git-2.51.0-doc",
+        "out": "/nix/store/r69a5mdcc3kwnnc6xlq391aybikda4kn-git-2.51.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "git",
+      "broken": false,
+      "derivation": "/nix/store/s05kvkqqz9ixgk214jy0ps9xlg9hg7pd-git-2.51.0.drv",
+      "description": "Distributed version control system",
+      "install_id": "git",
+      "license": "GPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "git-2.51.0",
+      "pname": "git",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:18.770737Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/gmjk0q6m10ld75d8z4hyfhc0izr5jkg0-git-2.51.0-doc",
+        "out": "/nix/store/jllay36l7wbc5y76429n1n5sfdmy0frp-git-2.51.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "git",
+      "broken": false,
+      "derivation": "/nix/store/4s61qmikkq6gzpg7lrrihy1a9fl8yki6-git-2.51.0.drv",
+      "description": "Distributed version control system",
+      "install_id": "git",
+      "license": "GPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "git-2.51.0",
+      "pname": "git",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:46:25.457031Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.51.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "debug": "/nix/store/43p28p01lbl4l1xj4hicpckkdyfdvkr3-git-2.51.0-debug",
+        "doc": "/nix/store/bjl8dr5jw9cqiy5l62k927nd04qpbgsc-git-2.51.0-doc",
+        "out": "/nix/store/0vbjxlqj8zp0pdjl2szvg17a98vqwyqj-git-2.51.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -513,6 +797,250 @@
       "priority": 5
     },
     {
+      "attr_path": "nginx",
+      "broken": false,
+      "derivation": "/nix/store/nk8fzbnwqfr8yza7s66yla0bb3zhv5if-nginx-1.28.0.drv",
+      "description": "Reverse proxy and lightweight webserver",
+      "install_id": "nginx",
+      "license": "[ BSD-2-Clause, BSD-2-Clause, BSD-2-Clause, BSD-2-Clause ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nginx-1.28.0",
+      "pname": "nginx",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:05.741138Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.28.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/pmz0v17arzb7hrh3f0v0b6ah1pwr5mz5-nginx-1.28.0-doc",
+        "out": "/nix/store/lwsyrawlbizflngbgjsmn25cdv8yqmlp-nginx-1.28.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nginx",
+      "broken": false,
+      "derivation": "/nix/store/f5qzs2l4pc2hgqrw5cg7db24x5l8z3a5-nginx-1.28.0.drv",
+      "description": "Reverse proxy and lightweight webserver",
+      "install_id": "nginx",
+      "license": "[ BSD-2-Clause, BSD-2-Clause, BSD-2-Clause, BSD-2-Clause ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nginx-1.28.0",
+      "pname": "nginx",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:56.284019Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.28.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/vwffwaza6zzrq0wrcf6244mdd3mis0y8-nginx-1.28.0-doc",
+        "out": "/nix/store/c0z2xbdg68k2spfq8vsj6w1lai1m06k9-nginx-1.28.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nginx",
+      "broken": false,
+      "derivation": "/nix/store/zaw22bs2n6d9sxjz37xdxa0mmb59xdyx-nginx-1.28.0.drv",
+      "description": "Reverse proxy and lightweight webserver",
+      "install_id": "nginx",
+      "license": "[ BSD-2-Clause, BSD-2-Clause, BSD-2-Clause, BSD-2-Clause ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nginx-1.28.0",
+      "pname": "nginx",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:39.115224Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.28.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/za5vzjiz47p9jk406nd6fsdqbxx4bgpp-nginx-1.28.0-doc",
+        "out": "/nix/store/55vr8513h9m7vzqksj8vxrq58i6i0par-nginx-1.28.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nginx",
+      "broken": false,
+      "derivation": "/nix/store/44khkgm0zid4a7vqfmnwppp3nyppr6qp-nginx-1.28.0.drv",
+      "description": "Reverse proxy and lightweight webserver",
+      "install_id": "nginx",
+      "license": "[ BSD-2-Clause, BSD-2-Clause, BSD-2-Clause, BSD-2-Clause ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nginx-1.28.0",
+      "pname": "nginx",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:02.577859Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.28.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "doc": "/nix/store/4ya7d3ljrwnnrvpvvsi0s0m9b0pr946f-nginx-1.28.0-doc",
+        "out": "/nix/store/bqis2a16pk7hs360yc7m7zh7x2wlaia6-nginx-1.28.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/njql10f23aipqq0wxay6ad9rh0h6y845-nodejs-22.19.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nodejs-22.19.0",
+      "pname": "nodejs",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:07.112279Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.19.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/q5717bq2c2dcccyl7y0x5qr4504dk96w-nodejs-22.19.0-dev",
+        "libv8": "/nix/store/pjwc489b912csplpbkrz5qvwpfp3x8a7-nodejs-22.19.0-libv8",
+        "out": "/nix/store/7hnbd3z2flnqh17fh3sbk0srpn6zvzck-nodejs-22.19.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/wkcwb0hi4lrd492y41536s8nj2j8myjj-nodejs-22.19.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nodejs-22.19.0",
+      "pname": "nodejs",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:47:58.088600Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.19.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/hg4z4rayzry2fm40na7r5zwdsk5fsq3x-nodejs-22.19.0-dev",
+        "libv8": "/nix/store/izcf0v8wqz5i20ym2d25j7q99ga4pc06-nodejs-22.19.0-libv8",
+        "out": "/nix/store/v7yw5fxjc5q8hmbrc91g05pps8bhsrxk-nodejs-22.19.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/s7fnsj6i1mx7hizq1rni7pqk9lrbvhcp-nodejs-22.19.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nodejs-22.19.0",
+      "pname": "nodejs",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:40.353484Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.19.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/10g223jgp8rdmyr7a35n8ffvcy7fdwwj-nodejs-22.19.0-dev",
+        "libv8": "/nix/store/k8n7pak4w7g9gl66cv2lvwbaa1k90cvv-nodejs-22.19.0-libv8",
+        "out": "/nix/store/k400m590nxzdzjh3knhygrx9dvwymj0b-nodejs-22.19.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/3w3jqy448psycb24x4m3angc70g6nj8l-nodejs-22.19.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "nodejs-22.19.0",
+      "pname": "nodejs",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:04.628220Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.19.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dev": "/nix/store/lqjnmhndv91n749bg0f5m4kxkay5gx2c-nodejs-22.19.0-dev",
+        "libv8": "/nix/store/avmhpnmdxk8jx3ascl4r95i82yx95v5h-nodejs-22.19.0-libv8",
+        "out": "/nix/store/cwxxy2is6hb4dcqsx8rhnvwic3hfzpcd-nodejs-22.19.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "openjdk",
       "broken": false,
       "derivation": "/nix/store/b7wbccqf9sqwd9093mg3r1fb7fgri4a7-zulu-ca-jdk-21.0.8.drv",
@@ -625,6 +1153,144 @@
       "outputs": {
         "debug": "/nix/store/8n7g1dv9cy7xgfwlizhg2cfwj2f4avd8-openjdk-21.0.8+9-debug",
         "out": "/nix/store/0x556ql275jkl46k6lklpyvwn5c4p244-openjdk-21.0.8+9"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openssl",
+      "broken": false,
+      "derivation": "/nix/store/fgjn8m61ha338i7bk758zv2csj2r5nn2-openssl-3.5.2.drv",
+      "description": "Cryptographic library that implements the SSL and TLS protocols",
+      "install_id": "openssl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openssl-3.5.2",
+      "pname": "openssl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:09.909780Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.5.2",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/iyba5bmji77achwhhp0c1k35amki3iz8-openssl-3.5.2-bin",
+        "dev": "/nix/store/1i7klgpiazhlq7q6f361aqa3i5yysfhy-openssl-3.5.2-dev",
+        "doc": "/nix/store/zzjqzzfv83yziqiv0x7qdjz1m8bsx4ii-openssl-3.5.2-doc",
+        "man": "/nix/store/814aqaj5iqd6x9ij8driahid9mwi0yvh-openssl-3.5.2-man",
+        "out": "/nix/store/hxmkygn2zl0f2w9kbixmm50lsy60zya0-openssl-3.5.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openssl",
+      "broken": false,
+      "derivation": "/nix/store/2yf91cmh1s61hbjfy3i0g015jnfxv3kj-openssl-3.5.2.drv",
+      "description": "Cryptographic library that implements the SSL and TLS protocols",
+      "install_id": "openssl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openssl-3.5.2",
+      "pname": "openssl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:02.548185Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.5.2",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/c86sfbcw9rsjq33w6p89i60whrcavd42-openssl-3.5.2-bin",
+        "debug": "/nix/store/3lfcl34lz6qxh143q3gkykdkdc3jgnn5-openssl-3.5.2-debug",
+        "dev": "/nix/store/ch4i86pqg8v5zcyg8ci728jxbhyvmhvi-openssl-3.5.2-dev",
+        "doc": "/nix/store/f5xhcyc4drgpm7q62zac3fssiym6r3sn-openssl-3.5.2-doc",
+        "man": "/nix/store/w4cfycgfl4bx31ivf8crjzpj7f3lqcpa-openssl-3.5.2-man",
+        "out": "/nix/store/finfj1yabyy8q87kpf4scdqmxdrq7qmf-openssl-3.5.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openssl",
+      "broken": false,
+      "derivation": "/nix/store/khk5kh3ns0y64vn378c2hqjb0dakhfnd-openssl-3.5.2.drv",
+      "description": "Cryptographic library that implements the SSL and TLS protocols",
+      "install_id": "openssl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openssl-3.5.2",
+      "pname": "openssl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:15:42.933244Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.5.2",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/v68l8qj86n0yyvvv6ps0hxv1viwbn0yw-openssl-3.5.2-bin",
+        "dev": "/nix/store/bpc76dzbj75a46gvfi1qwp5k63hbxyn2-openssl-3.5.2-dev",
+        "doc": "/nix/store/ky2dyyqhnq4gv11pl5wbv8m1jxa73j1y-openssl-3.5.2-doc",
+        "man": "/nix/store/5imfgrvzgra1v0h9rf0min2y522ghlgx-openssl-3.5.2-man",
+        "out": "/nix/store/b791qlzdzhxyp8yb30xgivx5jfifglr5-openssl-3.5.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "openssl",
+      "broken": false,
+      "derivation": "/nix/store/6l77ssnr72k2kl9fyvqwx7v9dw88jcac-openssl-3.5.2.drv",
+      "description": "Cryptographic library that implements the SSL and TLS protocols",
+      "install_id": "openssl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "openssl-3.5.2",
+      "pname": "openssl",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:09.044565Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.5.2",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/3kasb92ri5cmp7gwxgj8jgk87pr83y7p-openssl-3.5.2-bin",
+        "debug": "/nix/store/kis9gnnp4cpkj3gzz8as8x4mdjy048rr-openssl-3.5.2-debug",
+        "dev": "/nix/store/cz9k6nhxjppa1kmyf5npd0g8l89xzilw-openssl-3.5.2-dev",
+        "doc": "/nix/store/6il0fcxzqlgnv18sdis5i3g42cqg9vw6-openssl-3.5.2-doc",
+        "man": "/nix/store/43nmidiphlzywh223q871b43gah77gvp-openssl-3.5.2-man",
+        "out": "/nix/store/0837wpkjb27cr70bi3pc4g2rw5v9r63l-openssl-3.5.2"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -983,6 +1649,366 @@
       "outputs": {
         "debug": "/nix/store/h4m4mz0j2iyfj17zmq49n0g5i8zywic6-python3-3.12.11-debug",
         "out": "/nix/store/27fr7ynpilzb7rzmay73g905jbl8br4a-python3-3.12.11"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.pyyaml",
+      "broken": false,
+      "derivation": "/nix/store/qd1nvsncfq7d7xp94vafzrjs8a2466m9-python3.12-pyyaml-6.0.2.drv",
+      "description": "Next generation YAML parser and emitter for Python",
+      "install_id": "pyyaml",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-pyyaml-6.0.2",
+      "pname": "pyyaml",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:38.574698Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "6.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/cv6zcf0zq8x0s5i8p71zjhg0gjwvdqrj-python3.12-pyyaml-6.0.2-dist",
+        "out": "/nix/store/gvxqkcnqacxnfkgi7fd1ljg2zi10bkba-python3.12-pyyaml-6.0.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.pyyaml",
+      "broken": false,
+      "derivation": "/nix/store/09dfcrchks9m62q0xcl9iqnnk2rwbpcj-python3.12-pyyaml-6.0.2.drv",
+      "description": "Next generation YAML parser and emitter for Python",
+      "install_id": "pyyaml",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-pyyaml-6.0.2",
+      "pname": "pyyaml",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:40.963117Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "6.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/2m8gwshy33kr00w7ayp2ac9pbla5bngg-python3.12-pyyaml-6.0.2-dist",
+        "out": "/nix/store/np6zc89z4gjpvrfd98rrsyp9zh6b1k7l-python3.12-pyyaml-6.0.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.pyyaml",
+      "broken": false,
+      "derivation": "/nix/store/h7ja9zv82cppq6x1kdc00v98p6p6rx47-python3.12-pyyaml-6.0.2.drv",
+      "description": "Next generation YAML parser and emitter for Python",
+      "install_id": "pyyaml",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-pyyaml-6.0.2",
+      "pname": "pyyaml",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:09.362826Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "6.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/2kns5wdnxg96zcn5nchf7f6xrmmwnbli-python3.12-pyyaml-6.0.2-dist",
+        "out": "/nix/store/k2x6fff7yp3a2dgh6m1gznrbkfac3zs8-python3.12-pyyaml-6.0.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.pyyaml",
+      "broken": false,
+      "derivation": "/nix/store/90nkhl9bynq2zrjdgpjavkyknz8mambq-python3.12-pyyaml-6.0.2.drv",
+      "description": "Next generation YAML parser and emitter for Python",
+      "install_id": "pyyaml",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-pyyaml-6.0.2",
+      "pname": "pyyaml",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:48.124566Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "6.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/rs9vx1d7kax0wwdxkyl13m6jz0mqw7kg-python3.12-pyyaml-6.0.2-dist",
+        "out": "/nix/store/9651xl317h3vwzxjaz7v4dk2jy8sghhk-python3.12-pyyaml-6.0.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.requests",
+      "broken": false,
+      "derivation": "/nix/store/akd1mlklkg6j87h294b055kgl8k07z8l-python3.12-requests-2.32.5.drv",
+      "description": "HTTP library for Python",
+      "install_id": "requests",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-requests-2.32.5",
+      "pname": "requests",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:39.005135Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.32.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/74iafhn5nabniy3y27wpal2azyd0aciv-python3.12-requests-2.32.5-dist",
+        "out": "/nix/store/ckc382whazaygm52dsw332w6pd9sx8bv-python3.12-requests-2.32.5"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.requests",
+      "broken": false,
+      "derivation": "/nix/store/lmzx5bijzmxd54qdyddnamwksbk82xil-python3.12-requests-2.32.5.drv",
+      "description": "HTTP library for Python",
+      "install_id": "requests",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-requests-2.32.5",
+      "pname": "requests",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:41.485785Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.32.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/vzxaw6lpajl7krd7fkchl2585yhv91jp-python3.12-requests-2.32.5-dist",
+        "out": "/nix/store/ykzapm9hn06mkzqw2jl5vda7ci1kr8gs-python3.12-requests-2.32.5"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.requests",
+      "broken": false,
+      "derivation": "/nix/store/3zwhc8hj17yx512cnag8jma97xp9dd13-python3.12-requests-2.32.5.drv",
+      "description": "HTTP library for Python",
+      "install_id": "requests",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-requests-2.32.5",
+      "pname": "requests",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:09.775534Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.32.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/lp5cmlfmy2x8g2421shkh0vzms5qxhk4-python3.12-requests-2.32.5-dist",
+        "out": "/nix/store/iyps0cyn2sp8zni3310i4n2g6sgrn8wy-python3.12-requests-2.32.5"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.requests",
+      "broken": false,
+      "derivation": "/nix/store/vrxbcqhmyprbv7l5rxj8gimgjlzygh82-python3.12-requests-2.32.5.drv",
+      "description": "HTTP library for Python",
+      "install_id": "requests",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-requests-2.32.5",
+      "pname": "requests",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:48.678323Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.32.5",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/f7vyglh32l9mcfapw1m2w8y1a3p5816v-python3.12-requests-2.32.5-dist",
+        "out": "/nix/store/zrzvh799gr2879ihyzpg511v8y2cy6hd-python3.12-requests-2.32.5"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.urllib3",
+      "broken": false,
+      "derivation": "/nix/store/6pisn01rflklglwrsx5phxq6l3b1bfbp-python3.12-urllib3-2.5.0.drv",
+      "description": "Powerful, user-friendly HTTP client for Python",
+      "install_id": "urllib3",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-urllib3-2.5.0",
+      "pname": "urllib3",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:18:43.522533Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3.12-urllib3-2.5.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/47ms38h70jr8lisdcvrgmzwlk5khxfh2-python3.12-urllib3-2.5.0-dist",
+        "out": "/nix/store/xwwzl6vi1lmlqspyyyrvhbsi86ilxnc2-python3.12-urllib3-2.5.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.urllib3",
+      "broken": false,
+      "derivation": "/nix/store/vl302873nq68i6r79s5gsh16lj1c5i5r-python3.12-urllib3-2.5.0.drv",
+      "description": "Powerful, user-friendly HTTP client for Python",
+      "install_id": "urllib3",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-urllib3-2.5.0",
+      "pname": "urllib3",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T03:48:47.020750Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3.12-urllib3-2.5.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/vg698asryx0wwjfi4h7f134g3r67fzjg-python3.12-urllib3-2.5.0-dist",
+        "out": "/nix/store/m8dngniryr390vmllahj0jhzkln9ll71-python3.12-urllib3-2.5.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.urllib3",
+      "broken": false,
+      "derivation": "/nix/store/g3hp0l0rmhhi4ij1hlg9qs7g5gqpcnb3-python3.12-urllib3-2.5.0.drv",
+      "description": "Powerful, user-friendly HTTP client for Python",
+      "install_id": "urllib3",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-urllib3-2.5.0",
+      "pname": "urllib3",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:16:13.837840Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3.12-urllib3-2.5.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/kixjw5p573njpqlzb4rinrmaz0xb34yr-python3.12-urllib3-2.5.0-dist",
+        "out": "/nix/store/vwjsyjb3wxnph38ziwj3p8wg59gzf717-python3.12-urllib3-2.5.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "python312Packages.urllib3",
+      "broken": false,
+      "derivation": "/nix/store/3frxx3jvb46vpkwky1f7sijz55plsmr0-python3.12-urllib3-2.5.0.drv",
+      "description": "Powerful, user-friendly HTTP client for Python",
+      "install_id": "urllib3",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "name": "python3.12-urllib3-2.5.0",
+      "pname": "urllib3",
+      "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+      "rev_count": 876718,
+      "rev_date": "2025-10-12T16:01:26Z",
+      "scrape_date": "2025-10-14T04:47:54.342897Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "python3.12-urllib3-2.5.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "dist": "/nix/store/a0npdi0qcpcgdamazn2kk1bs1kalpr4c-python3.12-urllib3-2.5.0-dist",
+        "out": "/nix/store/wv6vsaf1mjzx22cld8m6fsq78l4881z6-python3.12-urllib3-2.5.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",

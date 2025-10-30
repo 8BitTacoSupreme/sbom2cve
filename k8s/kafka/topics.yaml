@@ -1,0 +1,136 @@
+---
+# PURL Mapping Rules Topic (Broadcast)
+# Single partition for consistent broadcast state
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: purl-mapping-rules
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: purl-mapper
+spec:
+  partitions: 1  # Single partition ensures consistent broadcast
+  replicas: 3
+  config:
+    cleanup.policy: compact  # Keep latest ruleset
+    min.compaction.lag.ms: 0
+    segment.ms: 3600000  # Compact hourly
+    retention.ms: -1  # Keep forever (compacted)
+    max.message.bytes: 10485760  # 10MB (large ruleset)
+
+---
+# CVEs Enriched Topic (After PURL Mapping)
+# High partition count for parallelism
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: cves-enriched
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: purl-mapper
+spec:
+  partitions: 500  # High parallelism for matching
+  replicas: 3
+  config:
+    cleanup.policy: compact
+    min.compaction.lag.ms: 300000  # 5 minutes
+    retention.ms: 2592000000  # 30 days
+    compression.type: lz4
+    max.message.bytes: 1048576  # 1MB
+
+---
+# KEV Feed Topic (CISA Known Exploited Vulnerabilities)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: kev-feed
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: risk-scorer
+spec:
+  partitions: 1  # Low volume, ordered stream
+  replicas: 3
+  config:
+    cleanup.policy: compact  # Keep latest KEV status per CVE
+    min.compaction.lag.ms: 3600000  # 1 hour lag
+    retention.ms: -1  # Keep forever
+    max.message.bytes: 524288  # 512KB
+
+---
+# VEX Statements Topic (Organization Overrides)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: vex-statements
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: vex-api
+spec:
+  partitions: 50  # Moderate parallelism
+  replicas: 3
+  config:
+    cleanup.policy: compact  # Keep latest VEX per org:cve:purl
+    min.compaction.lag.ms: 60000  # 1 minute lag
+    retention.ms: -1  # Keep forever
+    max.message.bytes: 524288  # 512KB
+
+---
+# Alerts Enriched Topic (Final Output with Risk Scores)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: alerts-enriched
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: matcher
+spec:
+  partitions: 500  # High parallelism
+  replicas: 3
+  config:
+    cleanup.policy: delete  # Alerts are time-series data
+    retention.ms: 2592000000  # 30 days
+    compression.type: lz4
+    max.message.bytes: 1048576  # 1MB
+
+---
+# SBOM Packages by PURL Topic (Fan-out from SBOMs)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: sbom-packages-by-purl
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: sbom-fanout
+spec:
+  partitions: 500
+  replicas: 3
+  config:
+    cleanup.policy: compact  # Current state of packages
+    min.compaction.lag.ms: 300000  # 5 minutes
+    retention.ms: -1  # Keep forever
+    compression.type: lz4
+
+---
+# CVE Rules by PURL Topic (Fan-out from CVEs)
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: cve-rules-by-purl
+  namespace: sbom2cve
+  labels:
+    app: sbom2cve
+    component: cve-fanout
+spec:
+  partitions: 500
+  replicas: 3
+  config:
+    cleanup.policy: compact  # Current CVE rules
+    min.compaction.lag.ms: 300000  # 5 minutes
+    retention.ms: -1  # Keep forever
+    compression.type: lz4
