@@ -1,0 +1,37 @@
+# SBOM2CVE Terraform Variables Example
+# Copy to terraform.tfvars and customize
+
+# AWS Configuration
+aws_region  = "us-west-2"
+environment = "prod"
+
+# Cluster Configuration
+cluster_name = "sbom2cve"
+agent_count  = 3 # Number of worker nodes
+
+# Instance Types
+server_instance_type = "t3.large"  # 2 vCPU, 8GB RAM (control plane)
+agent_instance_type  = "t3.xlarge" # 4 vCPU, 16GB RAM (workers with Kafka)
+
+# K3s Cluster Token (generate with: openssl rand -hex 32)
+k3s_cluster_token = "YOUR_CLUSTER_TOKEN_HERE"
+
+# SSH Public Key (paste your public key here, or set via env var)
+ssh_public_key = "ssh-rsa AAAAB3NzaC... your-email@example.com"
+
+# Security: Restrict Access (CHANGE THESE IN PRODUCTION!)
+ssh_allowed_cidr        = ["0.0.0.0/0"] # Replace with your IP: ["1.2.3.4/32"]
+k8s_api_allowed_cidr    = ["0.0.0.0/0"] # Replace with your IP
+kafka_allowed_cidr      = ["0.0.0.0/0"] # Or restrict to VPN/office
+monitoring_allowed_cidr = ["0.0.0.0/0"] # Prometheus/Grafana access
+
+# Load Balancer
+enable_alb = true # Set to false if you don't need public VEX API
+
+# Additional Tags
+tags = {
+  Owner       = "your-name"
+  CostCenter  = "engineering"
+  Project     = "sbom2cve"
+  Environment = "prod"
+}
