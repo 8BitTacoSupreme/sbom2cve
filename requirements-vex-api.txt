@@ -1,0 +1,12 @@
+# VEX API Dependencies
+# Python 3.12+
+
+# Web framework
+Flask==3.1.2
+Werkzeug==3.1.3
+
+# Kafka client
+kafka-python==2.0.2
+
+# HTTP requests (for healthcheck)
+requests==2.32.5
