@@ -55,3 +55,6 @@ test_output/
 q4-campaigns.csv
 
 *.log
+
+# Future planning docs (work in progress)
+FUTURE_STATE.md
