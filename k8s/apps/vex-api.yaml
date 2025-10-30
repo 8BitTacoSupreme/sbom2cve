@@ -1,0 +1,158 @@
+---
+# VEX API Deployment
+# Flask REST API for VEX (Vulnerability Exploitability eXchange) statements
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vex-api
+  namespace: sbom2cve
+  labels:
+    app: vex-api
+    component: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vex-api
+  template:
+    metadata:
+      labels:
+        app: vex-api
+        component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: vex-api
+          image: sbom2cve/vex-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "sbom2cve-kafka-bootstrap:9092"
+            - name: VEX_TOPIC
+              value: "vex-statements"
+            - name: FLASK_ENV
+              value: "production"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+
+---
+# VEX API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: vex-api
+  namespace: sbom2cve
+  labels:
+    app: vex-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: vex-api
+
+---
+# VEX API Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vex-api-hpa
+  namespace: sbom2cve
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vex-api
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# VEX API Ingress (Optional - for external access)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vex-api
+  namespace: sbom2cve
+  annotations:
+    kubernetes.io/ingress.class: "nginx"  # Or traefik, depending on your setup
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Optional: TLS
+spec:
+  rules:
+    - host: vex-api.sbom2cve.local  # Change to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vex-api
+                port:
+                  number: 80
+  # Uncomment for TLS:
+  # tls:
+  #   - hosts:
+  #       - vex-api.sbom2cve.local
+  #     secretName: vex-api-tls
+
+---
+# ServiceMonitor for Prometheus (Optional)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vex-api
+  namespace: sbom2cve
+  labels:
+    app: vex-api
+spec:
+  selector:
+    matchLabels:
+      app: vex-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
