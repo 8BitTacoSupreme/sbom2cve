@@ -285,8 +285,8 @@ resource "aws_instance" "k3s_server" {
   iam_instance_profile   = aws_iam_instance_profile.k3s_node.name
 
   root_block_device {
-    volume_size = 100
-    volume_type = "gp3"
+    volume_size = var.environment == "dev" ? 20 : 100
+    volume_type = var.environment == "dev" ? "gp2" : "gp3" # gp2 for Free Tier
     encrypted   = true
   }
 
@@ -313,11 +313,11 @@ resource "aws_instance" "k3s_agent" {
   iam_instance_profile   = aws_iam_instance_profile.k3s_node.name
 
   root_block_device {
-    volume_size = 200 # Larger for Kafka storage
-    volume_type = "gp3"
+    volume_size = var.environment == "dev" ? 30 : 200 # Smaller for dev
+    volume_type = var.environment == "dev" ? "gp2" : "gp3" # gp2 for Free Tier
     encrypted   = true
-    iops        = 3000
-    throughput  = 125
+    iops        = var.environment == "dev" ? null : 3000 # Default IOPS for gp2
+    throughput  = var.environment == "dev" ? null : 125  # gp3 only
   }
 
   user_data = templatefile("${path.module}/user-data-agent.sh", {

@@ -1,0 +1,53 @@
+# SBOM2CVE Dev/Free Tier Configuration
+# Optimized for minimal cost and AWS Free Tier eligibility
+
+# AWS Configuration
+aws_region  = "us-east-1" # Usually has best Free Tier availability
+environment = "dev"
+
+# Cluster Configuration
+cluster_name = "sbom2cve-dev"
+agent_count  = 1 # Single worker node (minimal setup)
+
+# Instance Types - AWS Free Tier Eligible
+server_instance_type = "t2.micro"  # 1 vCPU, 1GB RAM (750 hrs/month free)
+agent_instance_type  = "t2.micro"  # 1 vCPU, 1GB RAM (750 hrs/month free)
+
+# K3s Cluster Token (generate with: openssl rand -hex 32)
+k3s_cluster_token = "YOUR_CLUSTER_TOKEN_HERE"
+
+# SSH Public Key
+# Set via env var: export TF_VAR_ssh_public_key="$(cat ~/.ssh/id_rsa.pub)"
+# Or paste here:
+# ssh_public_key = "ssh-rsa AAAAB3NzaC..."
+
+# Security: More restrictive for dev (CHANGE THESE!)
+ssh_allowed_cidr        = ["0.0.0.0/0"] # Replace with your IP: ["1.2.3.4/32"]
+k8s_api_allowed_cidr    = ["0.0.0.0/0"] # Replace with your IP
+kafka_allowed_cidr      = ["10.0.0.0/16"] # VPC only (no external Kafka access)
+monitoring_allowed_cidr = ["0.0.0.0/0"] # Or restrict to your IP
+
+# Load Balancer (disable to save cost)
+enable_alb = false # Use kubectl port-forward instead
+
+# Reduced storage for dev
+# Note: These are overridden in main.tf for dev, see dev-specific config below
+
+# Additional Tags
+tags = {
+  Owner       = "your-name"
+  Environment = "dev"
+  CostCenter  = "learning"
+  AutoShutdown = "true" # Reminder to stop when not in use
+}
+
+# Dev-specific notes:
+# - Total cost: ~$0-15/month (Free Tier eligible for first 12 months)
+# - 2x t2.micro instances: 750 hrs/month free each (covers 24/7 for first year)
+# - 30GB EBS: 30GB free tier (we use 20GB server + 30GB agent = 50GB, ~$5/month)
+# - Data transfer: 15GB/month free
+#
+# To minimize cost further:
+# - Stop instances when not in use (keeps EBS, ~$5/month when stopped)
+# - Use single t2.micro (agent_count = 0, run Kafka on server)
+# - Disable monitoring, reduce retention periods

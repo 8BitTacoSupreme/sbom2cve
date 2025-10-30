@@ -1,0 +1,116 @@
+---
+# SBOM2CVE Kafka Topics - Dev Configuration
+# Reduced partitions for single-broker setup
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: purl-mapping-rules
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 1
+  replicas: 1 # Single broker
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    min.compaction.lag.ms: 0
+    retention.ms: 86400000 # 1 day
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: cves-enriched
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 10 # Reduced from 500
+  replicas: 1
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    min.compaction.lag.ms: 0
+    retention.ms: 86400000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: kev-feed
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    retention.ms: 86400000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: vex-statements
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 3 # Reduced from 10
+  replicas: 1
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    retention.ms: 86400000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: alerts-enriched
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 10 # Reduced from 100
+  replicas: 1
+  config:
+    cleanup.policy: delete
+    compression.type: lz4
+    retention.ms: 86400000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: sbom-packages-by-purl
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 10 # Reduced from 500
+  replicas: 1
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    retention.ms: 86400000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: cve-rules-by-purl
+  namespace: sbom2cve
+  labels:
+    strimzi.io/cluster: sbom2cve-kafka
+spec:
+  partitions: 10 # Reduced from 500
+  replicas: 1
+  config:
+    cleanup.policy: compact
+    compression.type: lz4
+    retention.ms: 86400000
