@@ -21,6 +21,82 @@ class NixCVEProducer:
 
     # Real CVEs affecting common Nix packages
     KNOWN_NIX_CVES = [
+        # Demo CVEs with broad ranges to show matching capabilities
+        {
+            "cve_id": "CVE-2024-DEMO-GIT",
+            "severity": "HIGH",
+            "cvss_score": 7.8,
+            "description": "Git command injection vulnerability (DEMO)",
+            "affected_products": [
+                {
+                    "purl": "pkg:nix/nixpkgs/git",
+                    "version_affected": ">=2.0.0 <2.52.0"
+                }
+            ],
+            "references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-DEMO-GIT"
+            ]
+        },
+        {
+            "cve_id": "CVE-2024-DEMO-OPENSSL",
+            "severity": "CRITICAL",
+            "cvss_score": 9.1,
+            "description": "OpenSSL certificate validation bypass (DEMO)",
+            "affected_products": [
+                {
+                    "purl": "pkg:nix/nixpkgs/openssl",
+                    "version_affected": ">=3.0.0 <3.6.0"
+                }
+            ],
+            "references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-DEMO-OPENSSL"
+            ]
+        },
+        {
+            "cve_id": "CVE-2024-DEMO-CURL",
+            "severity": "HIGH",
+            "cvss_score": 8.2,
+            "description": "curl buffer overflow in URL parsing (DEMO)",
+            "affected_products": [
+                {
+                    "purl": "pkg:nix/nixpkgs/curl",
+                    "version_affected": ">=8.0.0 <8.17.0"
+                }
+            ],
+            "references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-DEMO-CURL"
+            ]
+        },
+        {
+            "cve_id": "CVE-2024-DEMO-NGINX",
+            "severity": "HIGH",
+            "cvss_score": 7.5,
+            "description": "nginx HTTP request smuggling (DEMO)",
+            "affected_products": [
+                {
+                    "purl": "pkg:nix/nixpkgs/nginx",
+                    "version_affected": ">=1.0.0 <1.29.0"
+                }
+            ],
+            "references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-DEMO-NGINX"
+            ]
+        },
+        {
+            "cve_id": "CVE-2024-DEMO-PYTHON",
+            "severity": "MEDIUM",
+            "cvss_score": 6.5,
+            "description": "Python tarfile path traversal (DEMO)",
+            "affected_products": [
+                {
+                    "purl": "pkg:nix/nixpkgs/python312",
+                    "version_affected": ">=3.12.0 <3.12.12"
+                }
+            ],
+            "references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-DEMO-PYTHON"
+            ]
+        },
         {
             "cve_id": "CVE-2022-3786",
             "severity": "HIGH",
